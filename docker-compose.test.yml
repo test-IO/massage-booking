@@ -1,6 +1,6 @@
 version: '3'
 services:
-  web:
+  sut:
     build: .
     command: ./scripts/run_tests_and_linter.sh
     ports:
