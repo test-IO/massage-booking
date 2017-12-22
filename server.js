@@ -19,7 +19,13 @@ app.post('/slack/slash-commands/book-massage', urlencodedParser, (req, res) => {
   if (payload.token !== process.env.VERIFICATION_TOKEN) {
     res.status(403).end('Access forbidden');
   } else {
-    macysBooking.bookMassage(payload);
+    macysBooking.bookMassage(payload, (error, response, body) => {
+      if (error) {
+        logger.error('Error', { method: 'bookMassage', error });
+      } else {
+        logger.info('Success', { method: 'bookMassage', body });
+      }
+    });
   }
 });
 
@@ -30,7 +36,13 @@ app.post('/slack/actions', urlencodedParser, (req, res) => {
   if (payload.token !== process.env.VERIFICATION_TOKEN) {
     res.status(403).end('Access forbidden');
   } else {
-    macysBooking.actionHandler(payload);
+    macysBooking.actionHandler(payload, (error, response, body) => {
+      if (error) {
+        logger.error('Error', { method: 'actionHandler', error });
+      } else {
+        logger.info('Success', { method: 'actionHandler', body });
+      }
+    });
   }
 });
 
