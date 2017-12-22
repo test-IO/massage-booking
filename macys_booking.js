@@ -1,7 +1,6 @@
-const logger = require('./logger');
 const request = require('request');
 
-function sendMessageToSlackResponseUrl(responseUrl, jsonMessage) {
+function sendMessageToSlackResponseUrl(responseUrl, jsonMessage, callback) {
   const postOptions = {
     uri: responseUrl,
     method: 'POST',
@@ -9,13 +8,7 @@ function sendMessageToSlackResponseUrl(responseUrl, jsonMessage) {
     json: jsonMessage,
   };
 
-  request(postOptions, (error, response, body) => {
-    if (error) {
-      logger.error('Error when sending message to responseUrl', { error });
-    } else {
-      logger.info('Successfully sent message to responseUrl', { body });
-    }
-  });
+  request(postOptions, callback);
 }
 
 
@@ -24,7 +17,7 @@ class MacysBooking {
     this.slackWebClient = slackWebClient;
   }
 
-  bookMassage(payload) {
+  bookMassage(payload, callback) {
     const attachments = [
       {
         text: 'There is one spot available at HH:MM, do you want to reserve it?',
@@ -49,7 +42,7 @@ class MacysBooking {
       },
     ];
 
-    sendMessageToSlackResponseUrl(payload.response_url, { attachments });
+    sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
 
 
     // web.chat.postMessage(payload.channel_id, 'Test', { attachments }, (err, res) => {
@@ -61,7 +54,7 @@ class MacysBooking {
     // });
   }
 
-  actionHandler(payload) {
+  actionHandler(payload, callback) {
     const message = {
       attachments: [
         {
@@ -71,7 +64,7 @@ class MacysBooking {
       replace_original: true,
     };
 
-    sendMessageToSlackResponseUrl(payload.response_url, message);
+    sendMessageToSlackResponseUrl(payload.response_url, message, callback);
 
 
     // web.chat.update(payload.channel.id, 'Test', payload.message_ts, (err, res) => {
