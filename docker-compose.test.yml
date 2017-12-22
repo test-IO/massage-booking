@@ -3,7 +3,6 @@ services:
   web:
     build: .
     command: ./scripts/run_tests_and_linter.sh
-    env_file: variables.env
     ports:
       - '3000:3000'
     volumes:
