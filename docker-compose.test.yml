@@ -5,5 +5,3 @@ services:
     command: bash ./scripts/run_tests_and_linter.sh
     ports:
       - '3000:3000'
-    volumes:
-      - ./:/app
