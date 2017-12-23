@@ -6,6 +6,7 @@ RUN apk --update add \
   curl \
   nodejs \
   tmux \
+  tzdata \
   vim \
   wget
 
