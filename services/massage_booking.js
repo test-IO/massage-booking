@@ -12,7 +12,7 @@ function sendMessageToSlackResponseUrl(responseUrl, jsonMessage, callback) {
   request(postOptions, callback);
 }
 
-class MacysBooking {
+class MassageBooking {
   constructor(slackWebClient) {
     this.slackWebClient = slackWebClient;
     this.reservations = [];
@@ -86,4 +86,4 @@ class MacysBooking {
   }
 }
 
-module.exports = MacysBooking;
+module.exports = MassageBooking;

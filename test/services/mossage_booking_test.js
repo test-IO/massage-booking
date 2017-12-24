@@ -1,9 +1,15 @@
 require('should');
-const MacysBooking = require('../macys_booking');
+const MacysBooking = require('../../services/massage_booking');
 const nock = require('nock');
 const { WebClient } = require('@slack/client');
 
 nock.disableNetConnect();
+
+// .filteringRequestBody((body) => {
+//   jsonBody = JSON.parse(body);
+//   delete jsonBody.attachments[0].text;
+//   return jsonBody;
+// })
 
 describe('MacysBooking', () => {
   let macysBooking;

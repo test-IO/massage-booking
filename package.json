@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node ./server.js",
-    "test": "node node_modules/mocha/bin/mocha --recursive",
-    "lint": "./node_modules/.bin/eslint ."
+    "test": "mocha --recursive",
+    "lint": "eslint ."
   },
   "author": "Simon Lacroix <simon@test.io>",
   "license": "ISC",
