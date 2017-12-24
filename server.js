@@ -8,7 +8,8 @@ const app = express();
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 const slackWebClient = new WebClient(process.env.SLACK_API_TOKEN);
-const massageBooking = new MassageBooking(slackWebClient);
+const reservationDuration = parseInt(process.env.RESERVATION_DURATION, 10);
+const massageBooking = new MassageBooking(slackWebClient, reservationDuration);
 
 app.get('/', (req, res) => res.send('Hello World!'));
 

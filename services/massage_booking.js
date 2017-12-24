@@ -3,7 +3,7 @@ const request = require('request');
 const Reservation = require('../models/reservation');
 const User = require('../models/user');
 
-function extractTimeFromString(string) {
+function timeFromString(string) {
   const now = new Date(Date.now());
   const [hours, minutes] = string.split(':').map(x => parseInt(x, 10));
   return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
@@ -20,17 +20,24 @@ function sendMessageToSlackResponseUrl(responseUrl, jsonMessage, callback) {
   request(postOptions, callback);
 }
 
+function addMinutes(date, minutes) {
+  return new Date(date.getTime() + (60000 * minutes));
+}
+
+
 class MassageBooking {
-  constructor(slackWebClient) {
-    this.slackWebClient = slackWebClient;
+  constructor(slackWebClient, reservationDuration = 20) {
+    this.reservationDuration = reservationDuration;
     this.reservations = [];
+    this.slackWebClient = slackWebClient;
   }
 
   actionHandler(payload, callback) {
-    const selectedTime = extractTimeFromString(payload.actions[0].type === 'select' ? payload.actions[0].selected_options[0].value : payload.actions[0].value);
+    const startTime = timeFromString(payload.actions[0].type === 'select' ? payload.actions[0].selected_options[0].value : payload.actions[0].value);
+    const endTime = addMinutes(startTime, this.reservationDuration);
 
     const user = new User(payload.user.id, payload.user.name);
-    const dateRange = new DateRange(selectedTime, selectedTime);
+    const dateRange = new DateRange(startTime, endTime);
     this.reservations.push(new Reservation(user, dateRange));
 
 

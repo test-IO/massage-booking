@@ -58,7 +58,7 @@ describe('MassageBooking', () => {
             const now = new Date(Date.now());
             const dateRange = new DateRange(
               new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 33),
-              new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 33),
+              new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 53),
             );
             assert(reservation.dateRange.isEqual(dateRange));
 
@@ -101,7 +101,7 @@ describe('MassageBooking', () => {
             const now = new Date(Date.now());
             const dateRange = new DateRange(
               new Date(now.getFullYear(), now.getMonth(), now.getDate(), 15, 45),
-              new Date(now.getFullYear(), now.getMonth(), now.getDate(), 15, 45),
+              new Date(now.getFullYear(), now.getMonth(), now.getDate(), 16, 5),
             );
             assert(reservation.dateRange.isEqual(dateRange));
 
