@@ -33,7 +33,10 @@ describe('MacysBooking', () => {
           };
 
           const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
-            .post('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', { attachments: [{ text: 'simon clicked: reserve' }], replace_original: true })
+            .post('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
+              attachments: [{ text: 'simon clicked: reserve' }],
+              replace_original: true,
+            })
             .reply(200, 'ok');
 
           macysBooking.actionHandler(payload, () => {
@@ -45,7 +48,7 @@ describe('MacysBooking', () => {
         it('selected a time', (done) => {
           const payload = {
             type: 'interactive_message',
-            actions: [{ name: 'reserve', type: 'select', selected_options: [] }],
+            actions: [{ name: 'reserve', type: 'select', selected_options: [{ value: '15:45' }] }],
             callback_id: 'book-massage',
             team: { id: 'T25MRFT3M' },
             channel: { id: 'C8HTS5MEC' },
@@ -59,7 +62,10 @@ describe('MacysBooking', () => {
           };
 
           const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
-            .post('/actions/T25MRFT3M/290870923474/D5EQmPpOCph5nhjxCVUnXC6n', { attachments: [{ text: 'simon clicked: reserve' }], replace_original: true })
+            .post('/actions/T25MRFT3M/290870923474/D5EQmPpOCph5nhjxCVUnXC6n', {
+              attachments: [{ text: 'simon clicked: reserve' }],
+              replace_original: true,
+            })
             .reply(200, 'ok');
 
           macysBooking.actionHandler(payload, () => {

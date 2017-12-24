@@ -1,4 +1,5 @@
 const request = require('request');
+// const { DateRange, Reservation, User } = require('./models');
 
 function sendMessageToSlackResponseUrl(responseUrl, jsonMessage, callback) {
   const postOptions = {
@@ -14,6 +15,7 @@ function sendMessageToSlackResponseUrl(responseUrl, jsonMessage, callback) {
 class MacysBooking {
   constructor(slackWebClient) {
     this.slackWebClient = slackWebClient;
+    this.reservations = [];
   }
 
   actionHandler(payload, callback) {
@@ -78,7 +80,7 @@ class MacysBooking {
   }
 
   nextAvailability() {
-    const currentTimeInMs = new Date(Date.now());
+    const currentTimeInMs = Date.now();
     const currentTime = new Date(currentTimeInMs);
     return `${currentTime.getHours()}:${currentTime.getMinutes()}`;
   }
