@@ -1,6 +1,11 @@
 module.exports = class DateRange {
-  constructor(startAt, endAt) {
-    this.startAt = startAt;
-    this.endAt = endAt;
+  constructor(start, end) {
+    this.start = start;
+    this.end = end;
+  }
+
+  isEqual(dateRange) {
+    return this.start.getTime() === dateRange.start.getTime() &&
+           this.end.getTime() === dateRange.end.getTime();
   }
 };

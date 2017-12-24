@@ -1,5 +1,6 @@
-require('should');
-const MacysBooking = require('../../services/massage_booking');
+const assert = require('assert');
+const DateRange = require('../../models/date_range');
+const MassageBooking = require('../../services/massage_booking');
 const nock = require('nock');
 const { WebClient } = require('@slack/client');
 
@@ -11,12 +12,12 @@ nock.disableNetConnect();
 //   return jsonBody;
 // })
 
-describe('MacysBooking', () => {
-  let macysBooking;
+describe('MassageBooking', () => {
+  let massageBooking;
 
   beforeEach(() => {
     const slackWebClient = new WebClient(process.env.SLACK_API_TOKEN);
-    macysBooking = new MacysBooking(slackWebClient);
+    massageBooking = new MassageBooking(slackWebClient);
   });
 
   describe('#actionHandler', () => {
@@ -45,8 +46,22 @@ describe('MacysBooking', () => {
             })
             .reply(200, 'ok');
 
-          macysBooking.actionHandler(payload, () => {
+          massageBooking.actionHandler(payload, () => {
             slackCall.done();
+
+            assert.equal(massageBooking.reservations.length, 1);
+
+            const reservation = massageBooking.reservations[0];
+            assert.equal(reservation.user.id, 'U25PP0KEE');
+            assert.equal(reservation.user.name, 'simon');
+
+            const now = new Date(Date.now());
+            const dateRange = new DateRange(
+              new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 33),
+              new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 33),
+            );
+            assert(reservation.dateRange.isEqual(dateRange));
+
             done();
           });
         });
@@ -74,8 +89,22 @@ describe('MacysBooking', () => {
             })
             .reply(200, 'ok');
 
-          macysBooking.actionHandler(payload, () => {
+          massageBooking.actionHandler(payload, () => {
             slackCall.done();
+
+            assert.equal(massageBooking.reservations.length, 1);
+
+            const reservation = massageBooking.reservations[0];
+            assert.equal(reservation.user.id, 'U25PP0KEE');
+            assert.equal(reservation.user.name, 'simon');
+
+            const now = new Date(Date.now());
+            const dateRange = new DateRange(
+              new Date(now.getFullYear(), now.getMonth(), now.getDate(), 15, 45),
+              new Date(now.getFullYear(), now.getMonth(), now.getDate(), 15, 45),
+            );
+            assert(reservation.dateRange.isEqual(dateRange));
+
             done();
           });
         });
@@ -96,7 +125,7 @@ describe('MacysBooking', () => {
         trigger_id: '290064239264.73739537123.0cb6e21b315eff944b90b083405e102c',
       };
 
-      const nextAvailability = macysBooking.nextAvailability();
+      const nextAvailability = massageBooking.nextAvailability();
       const attachments = [
         {
           text: `There is one spot available at ${nextAvailability}, do you want to reserve it?`,
@@ -125,7 +154,7 @@ describe('MacysBooking', () => {
         .post('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments })
         .reply(200, 'ok');
 
-      macysBooking.bookMassage(payload, () => {
+      massageBooking.bookMassage(payload, () => {
         slackCall.done();
         done();
       });

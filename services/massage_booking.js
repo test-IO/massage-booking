@@ -1,5 +1,13 @@
+const DateRange = require('../models/date_range');
 const request = require('request');
-// const { DateRange, Reservation, User } = require('./models');
+const Reservation = require('../models/reservation');
+const User = require('../models/user');
+
+function extractTimeFromString(string) {
+  const now = new Date(Date.now());
+  const [hours, minutes] = string.split(':').map(x => parseInt(x, 10));
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+}
 
 function sendMessageToSlackResponseUrl(responseUrl, jsonMessage, callback) {
   const postOptions = {
@@ -19,6 +27,13 @@ class MassageBooking {
   }
 
   actionHandler(payload, callback) {
+    const selectedTime = extractTimeFromString(payload.actions[0].type === 'select' ? payload.actions[0].selected_options[0].value : payload.actions[0].value);
+
+    const user = new User(payload.user.id, payload.user.name);
+    const dateRange = new DateRange(selectedTime, selectedTime);
+    this.reservations.push(new Reservation(user, dateRange));
+
+
     const message = {
       attachments: [
         {
@@ -81,8 +96,8 @@ class MassageBooking {
 
   nextAvailability() {
     const currentTimeInMs = Date.now();
-    const currentTime = new Date(currentTimeInMs);
-    return `${currentTime.getHours()}:${currentTime.getMinutes()}`;
+    const now = new Date(currentTimeInMs);
+    return `${now.getHours()}:${now.getMinutes()}`;
   }
 }
 
