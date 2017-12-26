@@ -14,7 +14,6 @@ function sendMessageToSlackResponseUrl(responseUrl, jsonMessage, callback) {
     headers: { 'Content-type': 'application/json' },
     json: jsonMessage,
   };
-
   request(postOptions, callback);
 }
 
@@ -86,7 +85,7 @@ class MassageBooking {
         actions: [
           {
             name: 'reserve',
-            text: `Yes, reserve ${nextAvailabilityString}`,
+            text: `Yes, reserve ${timeToString(nextAvailabilities[0])} -> ${timeToString(addMinutes(nextAvailabilities[0], this.reservationDuration))}`,
             type: 'button',
             value: nextAvailabilityString,
           },
@@ -94,8 +93,10 @@ class MassageBooking {
             name: 'reserve',
             text: 'Pick a another time...',
             type: 'select',
-            options: nextAvailabilities.map(date => timeToString(date))
-              .map(value => ({ test: value, value })),
+            options: nextAvailabilities.map(date => ({
+              text: `${timeToString(date)} -> ${timeToString(addMinutes(date, this.reservationDuration))}`,
+              value: timeToString(date),
+            })),
           },
         ],
       },
@@ -107,20 +108,17 @@ class MassageBooking {
   dateRangeAvailable(userId, dateRange) {
     const intersectedReservation = this.reservations.find(reservation =>
       reservation.user.id !== userId &&
-      ((dateRange.start >= reservation.dateRange.start &&
-              dateRange.start < reservation.dateRange.end) ||
-            (dateRange.end > reservation.dateRange.start &&
-              dateRange.end <= reservation.dateRange.end)));
+      (
+        (dateRange.start >= reservation.dateRange.start && dateRange.start < reservation.dateRange.end) ||
+        (dateRange.end > reservation.dateRange.start && dateRange.end <= reservation.dateRange.end)
+      ));
     return typeof intersectedReservation === 'undefined';
   }
 
   findAvailabilities(userId, maxAvalaibilities = 10, minutesPerStep = 5) {
     const availabilities = [];
     let iterator = new Date();
-    const maxAvalaibilityDate = new Date(
-      iterator.getFullYear(), iterator.getMonth(), iterator.getDate(),
-      23, 59, 999,
-    );
+    const maxAvalaibilityDate = new Date(iterator.getFullYear(), iterator.getMonth(), iterator.getDate(), 23, 59, 999);
 
     if (iterator.getMinutes() % 5 <= 3) {
       iterator.setMinutes(iterator.getMinutes() - (iterator.getMinutes() % 5));
