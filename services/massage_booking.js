@@ -44,7 +44,9 @@ class MassageBooking {
     const endTime = addMinutes(startTime, this.reservationDuration);
 
     const dateRange = new DateRange(startTime, endTime);
-    if (this.dateRangeAvailable(dateRange)) {
+    if (this.dateRangeAvailable(payload.user.id, dateRange)) {
+      this.reservations = this.reservations.filter(reservation => reservation.user.id !== payload.user.id);
+
       const user = new User(payload.user.id, payload.user.name);
       this.reservations.push(new Reservation(user, dateRange));
 
@@ -73,7 +75,7 @@ class MassageBooking {
   }
 
   bookMassage(payload, callback) {
-    const nextAvailabilities = this.findAvailabilities(25);
+    const nextAvailabilities = this.findAvailabilities(payload.user_id, 25);
     const nextAvailabilityString = timeToString(nextAvailabilities[0]);
 
     const attachments = [
@@ -102,16 +104,17 @@ class MassageBooking {
     sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
   }
 
-  dateRangeAvailable(dateRange) {
+  dateRangeAvailable(userId, dateRange) {
     const intersectedReservation = this.reservations.find(reservation =>
-      (dateRange.start >= reservation.dateRange.start &&
-        dateRange.start < reservation.dateRange.end) ||
-      (dateRange.end > reservation.dateRange.start &&
-        dateRange.end <= reservation.dateRange.end));
+      reservation.user.id !== userId &&
+      ((dateRange.start >= reservation.dateRange.start &&
+              dateRange.start < reservation.dateRange.end) ||
+            (dateRange.end > reservation.dateRange.start &&
+              dateRange.end <= reservation.dateRange.end)));
     return typeof intersectedReservation === 'undefined';
   }
 
-  findAvailabilities(maxAvalaibilities = 10, minutesPerStep = 5) {
+  findAvailabilities(userId, maxAvalaibilities = 10, minutesPerStep = 5) {
     const availabilities = [];
     let iterator = new Date();
     const maxAvalaibilityDate = new Date(
@@ -135,7 +138,7 @@ class MassageBooking {
 
     while (availabilities.length < maxAvalaibilities && iterator < maxAvalaibilityDate) {
       const dateRange = new DateRange(iterator, addMinutes(iterator, this.reservationDuration));
-      if (this.dateRangeAvailable(dateRange)) {
+      if (this.dateRangeAvailable(userId, dateRange)) {
         availabilities.push(new Date(iterator));
       }
       iterator = addMinutes(iterator, minutesPerStep);
