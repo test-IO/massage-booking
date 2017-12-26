@@ -17,8 +17,8 @@ nock.disableNetConnect();
 // })
 
 describe('MassageBooking', () => {
-  let massageBooking,
-    now;
+  let massageBooking;
+  let now;
 
   beforeEach(() => {
     const slackWebClient = new WebClient(process.env.SLACK_API_TOKEN);
@@ -127,10 +127,31 @@ describe('MassageBooking', () => {
   describe('#bookMassage', () => {
     describe('without providing any parameters', () => {
       it('return find the earliest available time', (done) => {
-        const user = new User(faker.random.alphaNumeric(), faker.internet.userName());
-        const dateRange = new DateRange(
-          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 15, 45),
-          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 16, 5),
+        let user = new User(faker.random.uuid(), faker.internet.userName());
+        let dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 30, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 50, 0, 0),
+        );
+        massageBooking.reservations.push(new Reservation(user, dateRange));
+
+        user = new User(faker.random.uuid(), faker.internet.userName());
+        dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
+        );
+        massageBooking.reservations.push(new Reservation(user, dateRange));
+
+        user = new User(faker.random.uuid(), faker.internet.userName());
+        dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0, 0),
+        );
+        massageBooking.reservations.push(new Reservation(user, dateRange));
+
+        user = new User(faker.random.uuid(), faker.internet.userName());
+        dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 20, 0, 0),
         );
         massageBooking.reservations.push(new Reservation(user, dateRange));
 
@@ -145,8 +166,8 @@ describe('MassageBooking', () => {
           trigger_id: '290064239264.73739537123.0cb6e21b315eff944b90b083405e102c',
         };
 
-        timekeeper.travel(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 2));
-        const nextAvailability = '9:00';
+        timekeeper.travel(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 27));
+        const nextAvailability = '11:40';
         const attachments = [
           {
             text: `There is one spot available at ${nextAvailability}, do you want to reserve it?`,

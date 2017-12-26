@@ -7,9 +7,13 @@ function addMinutes(date, minutes) {
   return new Date(date.getTime() + (60000 * minutes));
 }
 
-function findAvailabilities(reservations) {
+function findAvailabilities(
+  reservations, maxAvalaibilities = 10,
+  minutesPerStep = 5, searchWindowInMinutes = 1440,
+) {
   const availabilities = [];
-  const iterator = new Date();
+  let iterator = new Date();
+  const maxAvalaibilityDate = addMinutes(iterator, searchWindowInMinutes);
 
   if (iterator.getMinutes() % 5 <= 3) {
     iterator.setMinutes(iterator.getMinutes() - (iterator.getMinutes() % 5));
@@ -25,7 +29,18 @@ function findAvailabilities(reservations) {
   iterator.setSeconds(0);
   iterator.setMilliseconds(0);
 
-  availabilities.push(new Date(iterator));
+  while (availabilities.length < maxAvalaibilities && iterator < maxAvalaibilityDate) {
+    const [start, end] = [iterator, addMinutes(iterator, 20)];
+    const intersectedReservation = reservations.find(reservation => (
+      start >= reservation.dateRange.start && start < reservation.dateRange.end) ||
+     (end > reservation.dateRange.start && end <= reservation.dateRange.end));
+
+    if (typeof intersectedReservation === 'undefined') {
+      availabilities.push(new Date(iterator));
+    }
+
+    iterator = addMinutes(iterator, minutesPerStep);
+  }
 
   return availabilities;
 }
