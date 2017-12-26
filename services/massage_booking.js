@@ -3,10 +3,31 @@ const request = require('request');
 const Reservation = require('../models/reservation');
 const User = require('../models/user');
 
-function timeFromString(string) {
-  const now = new Date(Date.now());
-  const [hours, minutes] = string.split(':').map(x => parseInt(x, 10));
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+function addMinutes(date, minutes) {
+  return new Date(date.getTime() + (60000 * minutes));
+}
+
+function findAvailabilities(reservations) {
+  const availabilities = [];
+  const iterator = new Date();
+
+  if (iterator.getMinutes() % 5 <= 3) {
+    iterator.setMinutes(iterator.getMinutes() - (iterator.getMinutes() % 5));
+  } else {
+    const newMinutes = iterator.getMinutes() + (5 - (iterator.getMinutes() % 5));
+    if (newMinutes === 60) {
+      iterator.setHours(iterator.getHours() + 1);
+      iterator.setMinutes(0);
+    } else {
+      iterator.setMinutes(newMinutes);
+    }
+  }
+  iterator.setSeconds(0);
+  iterator.setMilliseconds(0);
+
+  availabilities.push(new Date(iterator));
+
+  return availabilities;
 }
 
 function sendMessageToSlackResponseUrl(responseUrl, jsonMessage, callback) {
@@ -20,8 +41,10 @@ function sendMessageToSlackResponseUrl(responseUrl, jsonMessage, callback) {
   request(postOptions, callback);
 }
 
-function addMinutes(date, minutes) {
-  return new Date(date.getTime() + (60000 * minutes));
+function timeFromString(string) {
+  const now = new Date();
+  const [hours, minutes] = string.split(':').map(x => parseInt(x, 10));
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
 }
 
 
@@ -51,30 +74,23 @@ class MassageBooking {
     };
 
     sendMessageToSlackResponseUrl(payload.response_url, message, callback);
-
-
-    // web.chat.update(payload.channel.id, 'Test', payload.message_ts, (err, res) => {
-    //   if (err) {
-    //     console.log('Error:', err);
-    //   } else {
-    //     console.log('Message sent: ', res);
-    //   }
-    // });
   }
 
   bookMassage(payload, callback) {
-    const nextAvailability = this.nextAvailability();
+    const nextAvailabilities = findAvailabilities(this.reservations);
+    const nextAvailabilityString = nextAvailabilities[0].getMinutes() < 10 ? `${nextAvailabilities[0].getHours()}:0${nextAvailabilities[0].getMinutes()}` : `${nextAvailabilities[0].getHours()}:${nextAvailabilities[0].getMinutes()}`;
+
     const attachments = [
       {
-        text: `There is one spot available at ${nextAvailability}, do you want to reserve it?`,
+        text: `There is one spot available at ${nextAvailabilityString}, do you want to reserve it?`,
         callback_id: 'book-massage',
         attachment_type: 'default',
         actions: [
           {
             name: 'reserve',
-            text: `Yes, reserve ${nextAvailability}`,
+            text: `Yes, reserve ${nextAvailabilityString}`,
             type: 'button',
-            value: nextAvailability,
+            value: nextAvailabilityString,
           },
           {
             name: 'reserve',
@@ -90,21 +106,6 @@ class MassageBooking {
     ];
 
     sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
-
-
-    // web.chat.postMessage(payload.channel_id, 'Test', { attachments }, (err, res) => {
-    //   if (err) {
-    //     console.log('Error:', err);
-    //   } else {
-    //     console.log('Message sent: ', res);
-    //   }
-    // });
-  }
-
-  nextAvailability() {
-    const currentTimeInMs = Date.now();
-    const now = new Date(currentTimeInMs);
-    return `${now.getHours()}:${now.getMinutes()}`;
   }
 }
 

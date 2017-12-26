@@ -2,8 +2,5 @@
   "env": {
     "mocha": true
   },
-  "extends": "airbnb-base",
-  "rules": {
-    "class-methods-use-this": "warn"
-  }
+  "extends": "airbnb-base"
 }
