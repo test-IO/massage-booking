@@ -155,6 +155,13 @@ describe('MassageBooking', () => {
         );
         massageBooking.reservations.push(new Reservation(user, dateRange));
 
+        user = new User(faker.random.uuid(), faker.internet.userName());
+        dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 35, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 55, 0, 0),
+        );
+        massageBooking.reservations.push(new Reservation(user, dateRange));
+
         const payload = {
           token: '',
           team_id: 'T25MRFT3M',
@@ -185,8 +192,31 @@ describe('MassageBooking', () => {
                 text: 'Pick a another time...',
                 type: 'select',
                 options: [
-                  { text: '14:30', value: '14:30' },
-                  { text: '15:45', value: '15:45' },
+                  { test: '11:40', value: '11:40' },
+                  { test: '12:20', value: '12:20' },
+                  { test: '12:25', value: '12:25' },
+                  { test: '12:30', value: '12:30' },
+                  { test: '12:35', value: '12:35' },
+                  { test: '12:40', value: '12:40' },
+                  { test: '12:45', value: '12:45' },
+                  { test: '12:50', value: '12:50' },
+                  { test: '12:55', value: '12:55' },
+                  { test: '13:00', value: '13:00' },
+                  { test: '13:05', value: '13:05' },
+                  { test: '13:10', value: '13:10' },
+                  { test: '13:15', value: '13:15' },
+                  { test: '13:55', value: '13:55' },
+                  { test: '14:00', value: '14:00' },
+                  { test: '14:05', value: '14:05' },
+                  { test: '14:10', value: '14:10' },
+                  { test: '14:15', value: '14:15' },
+                  { test: '14:20', value: '14:20' },
+                  { test: '14:25', value: '14:25' },
+                  { test: '14:30', value: '14:30' },
+                  { test: '14:35', value: '14:35' },
+                  { test: '14:40', value: '14:40' },
+                  { test: '14:45', value: '14:45' },
+                  { test: '14:50', value: '14:50' },
                 ],
               },
             ],

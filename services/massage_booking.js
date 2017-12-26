@@ -7,13 +7,13 @@ function addMinutes(date, minutes) {
   return new Date(date.getTime() + (60000 * minutes));
 }
 
-function findAvailabilities(
-  reservations, maxAvalaibilities = 10,
-  minutesPerStep = 5, searchWindowInMinutes = 1440,
-) {
+function findAvailabilities(reservations, maxAvalaibilities = 10, minutesPerStep = 5) {
   const availabilities = [];
   let iterator = new Date();
-  const maxAvalaibilityDate = addMinutes(iterator, searchWindowInMinutes);
+  const maxAvalaibilityDate = new Date(
+    iterator.getFullYear(), iterator.getMonth(), iterator.getDate(),
+    23, 59, 999,
+  );
 
   if (iterator.getMinutes() % 5 <= 3) {
     iterator.setMinutes(iterator.getMinutes() - (iterator.getMinutes() % 5));
@@ -92,7 +92,7 @@ class MassageBooking {
   }
 
   bookMassage(payload, callback) {
-    const nextAvailabilities = findAvailabilities(this.reservations);
+    const nextAvailabilities = findAvailabilities(this.reservations, 25);
     const nextAvailabilityString = nextAvailabilities[0].getMinutes() < 10 ? `${nextAvailabilities[0].getHours()}:0${nextAvailabilities[0].getMinutes()}` : `${nextAvailabilities[0].getHours()}:${nextAvailabilities[0].getMinutes()}`;
 
     const attachments = [
@@ -111,14 +111,12 @@ class MassageBooking {
             name: 'reserve',
             text: 'Pick a another time...',
             type: 'select',
-            options: [
-              { text: '14:30', value: '14:30' },
-              { text: '15:45', value: '15:45' },
-            ],
+            options: nextAvailabilities.map(date => (date.getMinutes() < 10 ? `${date.getHours()}:0${date.getMinutes()}` : `${date.getHours()}:${date.getMinutes()}`)).map(value => ({ test: value, value })),
           },
         ],
       },
     ];
+    console.log(attachments[0].actions[1]);
 
     sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
   }
