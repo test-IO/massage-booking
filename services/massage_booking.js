@@ -7,44 +7,6 @@ function addMinutes(date, minutes) {
   return new Date(date.getTime() + (60000 * minutes));
 }
 
-function findAvailabilities(reservations, maxAvalaibilities = 10, minutesPerStep = 5) {
-  const availabilities = [];
-  let iterator = new Date();
-  const maxAvalaibilityDate = new Date(
-    iterator.getFullYear(), iterator.getMonth(), iterator.getDate(),
-    23, 59, 999,
-  );
-
-  if (iterator.getMinutes() % 5 <= 3) {
-    iterator.setMinutes(iterator.getMinutes() - (iterator.getMinutes() % 5));
-  } else {
-    const newMinutes = iterator.getMinutes() + (5 - (iterator.getMinutes() % 5));
-    if (newMinutes === 60) {
-      iterator.setHours(iterator.getHours() + 1);
-      iterator.setMinutes(0);
-    } else {
-      iterator.setMinutes(newMinutes);
-    }
-  }
-  iterator.setSeconds(0);
-  iterator.setMilliseconds(0);
-
-  while (availabilities.length < maxAvalaibilities && iterator < maxAvalaibilityDate) {
-    const [start, end] = [iterator, addMinutes(iterator, 20)];
-    const intersectedReservation = reservations.find(reservation => (
-      start >= reservation.dateRange.start && start < reservation.dateRange.end) ||
-     (end > reservation.dateRange.start && end <= reservation.dateRange.end));
-
-    if (typeof intersectedReservation === 'undefined') {
-      availabilities.push(new Date(iterator));
-    }
-
-    iterator = addMinutes(iterator, minutesPerStep);
-  }
-
-  return availabilities;
-}
-
 function sendMessageToSlackResponseUrl(responseUrl, jsonMessage, callback) {
   const postOptions = {
     uri: responseUrl,
@@ -62,6 +24,13 @@ function timeFromString(string) {
   return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
 }
 
+function timeToString(date) {
+  if (date.getMinutes() < 10) {
+    return `${date.getHours()}:0${date.getMinutes()}`;
+  }
+  return `${date.getHours()}:${date.getMinutes()}`;
+}
+
 
 class MassageBooking {
   constructor(slackWebClient, reservationDuration = 20) {
@@ -74,26 +43,38 @@ class MassageBooking {
     const startTime = timeFromString(payload.actions[0].type === 'select' ? payload.actions[0].selected_options[0].value : payload.actions[0].value);
     const endTime = addMinutes(startTime, this.reservationDuration);
 
-    const user = new User(payload.user.id, payload.user.name);
     const dateRange = new DateRange(startTime, endTime);
-    this.reservations.push(new Reservation(user, dateRange));
+    if (this.dateRangeAvailable(dateRange)) {
+      const user = new User(payload.user.id, payload.user.name);
+      this.reservations.push(new Reservation(user, dateRange));
 
+      const message = {
+        attachments: [
+          {
+            text: `Thanks for your booking at ${timeToString(startTime)}`,
+          },
+        ],
+        replace_original: true,
+      };
 
-    const message = {
-      attachments: [
-        {
-          text: `${payload.user.name} clicked: ${payload.actions[0].name}`,
-        },
-      ],
-      replace_original: true,
-    };
+      sendMessageToSlackResponseUrl(payload.response_url, message, callback);
+    } else {
+      const message = {
+        attachments: [
+          {
+            text: 'Sorry but this time is not available anymore',
+          },
+        ],
+        replace_original: true,
+      };
 
-    sendMessageToSlackResponseUrl(payload.response_url, message, callback);
+      sendMessageToSlackResponseUrl(payload.response_url, message, callback);
+    }
   }
 
   bookMassage(payload, callback) {
-    const nextAvailabilities = findAvailabilities(this.reservations, 25);
-    const nextAvailabilityString = nextAvailabilities[0].getMinutes() < 10 ? `${nextAvailabilities[0].getHours()}:0${nextAvailabilities[0].getMinutes()}` : `${nextAvailabilities[0].getHours()}:${nextAvailabilities[0].getMinutes()}`;
+    const nextAvailabilities = this.findAvailabilities(25);
+    const nextAvailabilityString = timeToString(nextAvailabilities[0]);
 
     const attachments = [
       {
@@ -111,14 +92,56 @@ class MassageBooking {
             name: 'reserve',
             text: 'Pick a another time...',
             type: 'select',
-            options: nextAvailabilities.map(date => (date.getMinutes() < 10 ? `${date.getHours()}:0${date.getMinutes()}` : `${date.getHours()}:${date.getMinutes()}`)).map(value => ({ test: value, value })),
+            options: nextAvailabilities.map(date => timeToString(date))
+              .map(value => ({ test: value, value })),
           },
         ],
       },
     ];
-    console.log(attachments[0].actions[1]);
 
     sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
+  }
+
+  dateRangeAvailable(dateRange) {
+    const intersectedReservation = this.reservations.find(reservation =>
+      (dateRange.start >= reservation.dateRange.start &&
+        dateRange.start < reservation.dateRange.end) ||
+      (dateRange.end > reservation.dateRange.start &&
+        dateRange.end <= reservation.dateRange.end));
+    return typeof intersectedReservation === 'undefined';
+  }
+
+  findAvailabilities(maxAvalaibilities = 10, minutesPerStep = 5) {
+    const availabilities = [];
+    let iterator = new Date();
+    const maxAvalaibilityDate = new Date(
+      iterator.getFullYear(), iterator.getMonth(), iterator.getDate(),
+      23, 59, 999,
+    );
+
+    if (iterator.getMinutes() % 5 <= 3) {
+      iterator.setMinutes(iterator.getMinutes() - (iterator.getMinutes() % 5));
+    } else {
+      const newMinutes = iterator.getMinutes() + (5 - (iterator.getMinutes() % 5));
+      if (newMinutes === 60) {
+        iterator.setHours(iterator.getHours() + 1);
+        iterator.setMinutes(0);
+      } else {
+        iterator.setMinutes(newMinutes);
+      }
+    }
+    iterator.setSeconds(0);
+    iterator.setMilliseconds(0);
+
+    while (availabilities.length < maxAvalaibilities && iterator < maxAvalaibilityDate) {
+      const dateRange = new DateRange(iterator, addMinutes(iterator, this.reservationDuration));
+      if (this.dateRangeAvailable(dateRange)) {
+        availabilities.push(new Date(iterator));
+      }
+      iterator = addMinutes(iterator, minutesPerStep);
+    }
+
+    return availabilities;
   }
 }
 
