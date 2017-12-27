@@ -52,7 +52,7 @@ class MassageBooking {
       const message = {
         attachments: [
           {
-            text: `Thanks for your booking at ${timeToString(startTime)}`,
+            text: `Thanks for your booking at ${timeToString(startTime)} -> ${timeToString(addMinutes(startTime, this.reservationDuration))}`,
           },
         ],
         replace_original: true,
@@ -76,10 +76,12 @@ class MassageBooking {
   bookMassage(payload, callback) {
     const nextAvailabilities = this.findAvailabilities(payload.user_id, 25);
     const nextAvailabilityString = timeToString(nextAvailabilities[0]);
+    const previousReservation = this.reservations.find(reservation => reservation.user.id === payload.user_id);
 
     const attachments = [
       {
         text: `There is one spot available at ${nextAvailabilityString}, do you want to reserve it?`,
+        color: '#36a64f',
         callback_id: 'book-massage',
         attachment_type: 'default',
         actions: [
@@ -101,6 +103,13 @@ class MassageBooking {
         ],
       },
     ];
+
+    if (typeof previousReservation !== 'undefined') {
+      attachments.push({
+        text: `Note: You already have a reservation for ${timeToString(previousReservation.dateRange.start)} -> ${timeToString(previousReservation.dateRange.end)}.\nMaking a new reservation will cancel the previous ones.`,
+        color: '#ffcc00',
+      });
+    }
 
     sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
   }

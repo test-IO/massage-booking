@@ -49,7 +49,7 @@ describe('MassageBooking', () => {
 
           const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
             .post('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
-              attachments: [{ text: 'Thanks for your booking at 17:33' }],
+              attachments: [{ text: 'Thanks for your booking at 17:33 -> 17:53' }],
               replace_original: true,
             })
             .reply(200, 'ok');
@@ -91,7 +91,7 @@ describe('MassageBooking', () => {
 
           const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
             .post('/actions/T25MRFT3M/290870923474/D5EQmPpOCph5nhjxCVUnXC6n', {
-              attachments: [{ text: 'Thanks for your booking at 15:45' }],
+              attachments: [{ text: 'Thanks for your booking at 15:45 -> 16:05' }],
               replace_original: true,
             })
             .reply(200, 'ok');
@@ -185,7 +185,7 @@ describe('MassageBooking', () => {
 
           const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
             .post('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
-              attachments: [{ text: 'Thanks for your booking at 14:00' }],
+              attachments: [{ text: 'Thanks for your booking at 14:00 -> 14:20' }],
               replace_original: true,
             })
             .reply(200, 'ok');
@@ -265,6 +265,7 @@ describe('MassageBooking', () => {
         const attachments = [
           {
             text: 'There is one spot available at 11:40, do you want to reserve it?',
+            color: '#36a64f',
             callback_id: 'book-massage',
             attachment_type: 'default',
             actions: [
@@ -351,6 +352,7 @@ describe('MassageBooking', () => {
         const attachments = [
           {
             text: 'There is one spot available at 10:50, do you want to reserve it?',
+            color: '#36a64f',
             callback_id: 'book-massage',
             attachment_type: 'default',
             actions: [
@@ -393,6 +395,10 @@ describe('MassageBooking', () => {
                 ],
               },
             ],
+          },
+          {
+            text: 'Note: You already have a reservation for 11:00 -> 11:20.\nMaking a new reservation will cancel the previous ones.',
+            color: '#ffcc00',
           },
         ];
         const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
