@@ -140,7 +140,7 @@ describe('MassageBooking', () => {
 
           const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
             .post('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
-              attachments: [{ text: 'Sorry but this time is not available anymore' }],
+              attachments: [{ text: 'Sorry but this time is not available anymore.' }],
               replace_original: true,
             })
             .reply(200, 'ok');
@@ -185,7 +185,7 @@ describe('MassageBooking', () => {
 
           const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
             .post('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
-              attachments: [{ text: 'Thanks for your booking at 14:00 -> 14:20' }],
+              attachments: [{ text: 'Your booking as been successfully updated to 14:00 -> 14:20' }],
               replace_original: true,
             })
             .reply(200, 'ok');

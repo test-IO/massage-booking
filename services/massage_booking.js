@@ -44,26 +44,32 @@ class MassageBooking {
 
     const dateRange = new DateRange(startTime, endTime);
     if (this.dateRangeAvailable(payload.user.id, dateRange)) {
+      const previousReservation = this.reservations.find(reservation => reservation.user.id === payload.user.id);
       this.reservations = this.reservations.filter(reservation => reservation.user.id !== payload.user.id);
 
       const user = new User(payload.user.id, payload.user.name);
       this.reservations.push(new Reservation(user, dateRange));
 
       const message = {
-        attachments: [
-          {
-            text: `Thanks for your booking at ${timeToString(startTime)} -> ${timeToString(addMinutes(startTime, this.reservationDuration))}`,
-          },
-        ],
+        attachments: [],
         replace_original: true,
       };
+      if (typeof previousReservation === 'undefined') {
+        message.attachments.push({
+          text: `Thanks for your booking at ${timeToString(startTime)} -> ${timeToString(addMinutes(startTime, this.reservationDuration))}`,
+        });
+      } else {
+        message.attachments.push({
+          text: `Your booking as been successfully updated to ${timeToString(startTime)} -> ${timeToString(addMinutes(startTime, this.reservationDuration))}`,
+        });
+      }
 
       sendMessageToSlackResponseUrl(payload.response_url, message, callback);
     } else {
       const message = {
         attachments: [
           {
-            text: 'Sorry but this time is not available anymore',
+            text: 'Sorry but this time is not available anymore.',
           },
         ],
         replace_original: true,
