@@ -44,9 +44,7 @@ class MassageBooking {
 
     const dateRange = new DateRange(startTime, endTime);
     if (this.dateRangeAvailable(payload.user.id, dateRange)) {
-      const now = new Date();
-      const previousReservation = this.reservations.filter(reservation => reservation.dateRange.end > now)
-        .find(reservation => reservation.user.id === payload.user.id);
+      const previousReservation = this.findReservationForUser(payload.user.id);
       this.reservations = this.reservations.filter(reservation => reservation.user.id !== payload.user.id);
 
       const user = new User(payload.user.id, payload.user.name);
@@ -82,10 +80,9 @@ class MassageBooking {
   }
 
   bookMassage(payload, callback) {
-    const now = new Date();
     const nextAvailabilities = this.findAvailabilities(payload.user_id, 25);
     const nextAvailabilityString = timeToString(nextAvailabilities[0]);
-    const previousReservation = this.reservations.filter(reservation => reservation.dateRange.end > now).find(reservation => reservation.user.id === payload.user_id);
+    const previousReservation = this.findReservationForUser(payload.user_id);
 
     const attachments = [
       {
@@ -131,6 +128,12 @@ class MassageBooking {
         (dateRange.end > reservation.dateRange.start && dateRange.end <= reservation.dateRange.end)
       ));
     return typeof intersectedReservation === 'undefined';
+  }
+
+  findReservationForUser(userId) {
+    const now = new Date();
+    return this.reservations.filter(reservation => reservation.dateRange.end > now)
+      .find(reservation => reservation.user.id === userId);
   }
 
   findAvailabilities(userId, maxAvalaibilities = 10, minutesPerStep = 5) {

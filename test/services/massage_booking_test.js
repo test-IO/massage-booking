@@ -10,6 +10,10 @@ const { WebClient } = require('@slack/client');
 
 nock.disableNetConnect();
 
+function nockSlackCall(path, payload) {
+  return nock('https://hooks.slack.com:443', { encodedQueryParams: true }).post(path, payload).reply(200, 'ok');
+}
+
 describe('MassageBooking', () => {
   let massageBooking;
   let now;
@@ -47,12 +51,10 @@ describe('MassageBooking', () => {
             trigger_id: '291932495047.73739537123.5a0db0f14d1768425d6c498ffe0eac72',
           };
 
-          const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
-            .post('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
-              attachments: [{ text: 'Thanks for your booking at 17:33 -> 17:53' }],
-              replace_original: true,
-            })
-            .reply(200, 'ok');
+          const slackCall = nockSlackCall('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
+            attachments: [{ text: 'Thanks for your booking at 17:33 -> 17:53' }],
+            replace_original: true,
+          });
 
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
@@ -89,12 +91,10 @@ describe('MassageBooking', () => {
             trigger_id: '290793622739.73739537123.14c350eed428152158ecf12061041e20',
           };
 
-          const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
-            .post('/actions/T25MRFT3M/290870923474/D5EQmPpOCph5nhjxCVUnXC6n', {
-              attachments: [{ text: 'Thanks for your booking at 15:45 -> 16:05' }],
-              replace_original: true,
-            })
-            .reply(200, 'ok');
+          const slackCall = nockSlackCall('/actions/T25MRFT3M/290870923474/D5EQmPpOCph5nhjxCVUnXC6n', {
+            attachments: [{ text: 'Thanks for your booking at 15:45 -> 16:05' }],
+            replace_original: true,
+          });
 
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
@@ -138,12 +138,10 @@ describe('MassageBooking', () => {
             trigger_id: '291932495047.73739537123.5a0db0f14d1768425d6c498ffe0eac72',
           };
 
-          const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
-            .post('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
-              attachments: [{ text: 'Sorry but this time is not available anymore.' }],
-              replace_original: true,
-            })
-            .reply(200, 'ok');
+          const slackCall = nockSlackCall('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
+            attachments: [{ text: 'Sorry but this time is not available anymore.' }],
+            replace_original: true,
+          });
 
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
@@ -183,12 +181,10 @@ describe('MassageBooking', () => {
             trigger_id: '291932495047.73739537123.5a0db0f14d1768425d6c498ffe0eac72',
           };
 
-          const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
-            .post('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
-              attachments: [{ text: 'Your booking as been successfully updated to 14:00 -> 14:20' }],
-              replace_original: true,
-            })
-            .reply(200, 'ok');
+          const slackCall = nockSlackCall('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
+            attachments: [{ text: 'Your booking as been successfully updated to 14:00 -> 14:20' }],
+            replace_original: true,
+          });
 
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
@@ -232,12 +228,10 @@ describe('MassageBooking', () => {
             trigger_id: '291932495047.73739537123.5a0db0f14d1768425d6c498ffe0eac72',
           };
 
-          const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
-            .post('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
-              attachments: [{ text: 'Thanks for your booking at 14:00 -> 14:20' }],
-              replace_original: true,
-            })
-            .reply(200, 'ok');
+          const slackCall = nockSlackCall('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
+            attachments: [{ text: 'Thanks for your booking at 14:00 -> 14:20' }],
+            replace_original: true,
+          });
 
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
@@ -359,9 +353,7 @@ describe('MassageBooking', () => {
             ],
           },
         ];
-        const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
-          .post('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments })
-          .reply(200, 'ok');
+        const slackCall = nockSlackCall('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
 
         massageBooking.bookMassage(payload, () => {
           slackCall.done();
@@ -450,9 +442,7 @@ describe('MassageBooking', () => {
             color: '#ffcc00',
           },
         ];
-        const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
-          .post('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments })
-          .reply(200, 'ok');
+        const slackCall = nockSlackCall('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
 
         massageBooking.bookMassage(payload, () => {
           slackCall.done();
@@ -529,9 +519,7 @@ describe('MassageBooking', () => {
             ],
           },
         ];
-        const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
-          .post('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments })
-          .reply(200, 'ok');
+        const slackCall = nockSlackCall('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
 
         massageBooking.bookMassage(payload, () => {
           slackCall.done();
