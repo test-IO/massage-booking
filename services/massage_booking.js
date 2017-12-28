@@ -44,7 +44,9 @@ class MassageBooking {
 
     const dateRange = new DateRange(startTime, endTime);
     if (this.dateRangeAvailable(payload.user.id, dateRange)) {
-      const previousReservation = this.reservations.find(reservation => reservation.user.id === payload.user.id);
+      const now = new Date();
+      const previousReservation = this.reservations.filter(reservation => reservation.dateRange.end > now)
+        .find(reservation => reservation.user.id === payload.user.id);
       this.reservations = this.reservations.filter(reservation => reservation.user.id !== payload.user.id);
 
       const user = new User(payload.user.id, payload.user.name);
@@ -80,9 +82,10 @@ class MassageBooking {
   }
 
   bookMassage(payload, callback) {
+    const now = new Date();
     const nextAvailabilities = this.findAvailabilities(payload.user_id, 25);
     const nextAvailabilityString = timeToString(nextAvailabilities[0]);
-    const previousReservation = this.reservations.find(reservation => reservation.user.id === payload.user_id);
+    const previousReservation = this.reservations.filter(reservation => reservation.dateRange.end > now).find(reservation => reservation.user.id === payload.user_id);
 
     const attachments = [
       {

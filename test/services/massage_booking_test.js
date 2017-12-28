@@ -166,8 +166,8 @@ describe('MassageBooking', () => {
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 15, 0, 0),
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 35, 0, 0),
           );
-
           massageBooking.reservations.push(new Reservation(user, dateRange));
+
           const payload = {
             type: 'interactive_message',
             actions: [{ name: 'reserve', type: 'button', value: '14:00' }],
@@ -186,6 +186,55 @@ describe('MassageBooking', () => {
           const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
             .post('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
               attachments: [{ text: 'Your booking as been successfully updated to 14:00 -> 14:20' }],
+              replace_original: true,
+            })
+            .reply(200, 'ok');
+
+          massageBooking.actionHandler(payload, () => {
+            slackCall.done();
+
+            assert.equal(massageBooking.reservations.length, 1);
+
+            const reservation = massageBooking.reservations[0];
+            assert.equal(reservation.user.id, 'U25PP0KEE');
+            assert.equal(reservation.user.name, 'simon');
+
+            const newDateRange = new DateRange(
+              new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 0, 0, 0),
+              new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 20, 0, 0),
+            );
+            assert(reservation.dateRange.isEqual(newDateRange));
+
+            done();
+          });
+        });
+
+        it('ignore past reservations', (done) => {
+          const user = new User('U25PP0KEE', faker.internet.userName());
+          const dateRange = new DateRange(
+            new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0, 0, 0),
+            new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 20, 0, 0),
+          );
+          massageBooking.reservations.push(new Reservation(user, dateRange));
+
+          const payload = {
+            type: 'interactive_message',
+            actions: [{ name: 'reserve', type: 'button', value: '14:00' }],
+            callback_id: 'book-massage',
+            team: { id: 'T25MRFT3M' },
+            channel: { id: 'C8HTS5MEC' },
+            user: { id: 'U25PP0KEE', name: 'simon' },
+            action_ts: '1514046806.960158',
+            message_ts: '1514046805.000007',
+            attachment_id: '1',
+            is_app_unfurl: false,
+            response_url: 'https://hooks.slack.com/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t',
+            trigger_id: '291932495047.73739537123.5a0db0f14d1768425d6c498ffe0eac72',
+          };
+
+          const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
+            .post('/actions/T25MRFT3M/290209823664/Dtfv5c9DWE7nh0wqVOYB2n8t', {
+              attachments: [{ text: 'Thanks for your booking at 14:00 -> 14:20' }],
               replace_original: true,
             })
             .reply(200, 'ok');
@@ -399,6 +448,85 @@ describe('MassageBooking', () => {
           {
             text: 'Note: You already have a reservation for 11:00 -> 11:20.\nMaking a new reservation will cancel the previous ones.',
             color: '#ffcc00',
+          },
+        ];
+        const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
+          .post('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments })
+          .reply(200, 'ok');
+
+        massageBooking.bookMassage(payload, () => {
+          slackCall.done();
+
+          done();
+        });
+      });
+
+      it('ignore past reservations', (done) => {
+        const user = new User('U25PP0KEE', faker.internet.userName());
+        const dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 10, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 30, 0, 0),
+        );
+        massageBooking.reservations.push(new Reservation(user, dateRange));
+
+        const payload = {
+          token: '',
+          team_id: 'T25MRFT3M',
+          channel_id: 'C8HTS5MEC',
+          user_id: 'U25PP0KEE',
+          command: '/book-massage',
+          text: '',
+          response_url: 'https://hooks.slack.com/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb',
+          trigger_id: '290064239264.73739537123.0cb6e21b315eff944b90b083405e102c',
+        };
+
+        timekeeper.travel(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 27));
+        const attachments = [
+          {
+            text: 'There is one spot available at 10:25, do you want to reserve it?',
+            color: '#36a64f',
+            callback_id: 'book-massage',
+            attachment_type: 'default',
+            actions: [
+              {
+                name: 'reserve',
+                text: 'Yes, reserve 10:25 -> 10:45',
+                type: 'button',
+                value: '10:25',
+              },
+              {
+                name: 'reserve',
+                text: 'Pick a another time...',
+                type: 'select',
+                options: [
+                  { text: '10:25 -> 10:45', value: '10:25' },
+                  { text: '10:30 -> 10:50', value: '10:30' },
+                  { text: '10:35 -> 10:55', value: '10:35' },
+                  { text: '10:40 -> 11:00', value: '10:40' },
+                  { text: '10:45 -> 11:05', value: '10:45' },
+                  { text: '10:50 -> 11:10', value: '10:50' },
+                  { text: '10:55 -> 11:15', value: '10:55' },
+                  { text: '11:00 -> 11:20', value: '11:00' },
+                  { text: '11:05 -> 11:25', value: '11:05' },
+                  { text: '11:10 -> 11:30', value: '11:10' },
+                  { text: '11:15 -> 11:35', value: '11:15' },
+                  { text: '11:20 -> 11:40', value: '11:20' },
+                  { text: '11:25 -> 11:45', value: '11:25' },
+                  { text: '11:30 -> 11:50', value: '11:30' },
+                  { text: '11:35 -> 11:55', value: '11:35' },
+                  { text: '11:40 -> 12:00', value: '11:40' },
+                  { text: '11:45 -> 12:05', value: '11:45' },
+                  { text: '11:50 -> 12:10', value: '11:50' },
+                  { text: '11:55 -> 12:15', value: '11:55' },
+                  { text: '12:00 -> 12:20', value: '12:00' },
+                  { text: '12:05 -> 12:25', value: '12:05' },
+                  { text: '12:10 -> 12:30', value: '12:10' },
+                  { text: '12:15 -> 12:35', value: '12:15' },
+                  { text: '12:20 -> 12:40', value: '12:20' },
+                  { text: '12:25 -> 12:45', value: '12:25' },
+                ],
+              },
+            ],
           },
         ];
         const slackCall = nock('https://hooks.slack.com:443', { encodedQueryParams: true })
