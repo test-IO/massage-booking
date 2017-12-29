@@ -95,6 +95,10 @@ class MassageBooking {
         return attachment;
       });
 
+      if (attachments.length === 0) {
+        attachments.push({ text: 'There is no booking yet, book a massage!', color: '#36a64f' });
+      }
+
       sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
     } else {
       const nextAvailabilities = this.findAvailabilities(payload.user_id, 25);

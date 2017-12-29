@@ -649,6 +649,31 @@ describe('MassageBooking', () => {
           done();
         });
       });
+
+      it('return a nice message if there is no reservations yet', (done) => {
+        const payload = {
+          token: '',
+          team_id: 'T25MRFT3M',
+          channel_id: 'C8HTS5MEC',
+          user_id: 'U25PP0KEE',
+          command: '/book-massage',
+          text: 'list',
+          response_url: 'https://hooks.slack.com/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb',
+          trigger_id: '290064239264.73739537123.0cb6e21b315eff944b90b083405e102c',
+        };
+
+        timekeeper.travel(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 27));
+        const attachments = [
+          { text: 'There is no booking yet, book a massage!', color: '#36a64f' },
+        ];
+        const slackCall = nockSlackCall('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
+
+        massageBooking.bookMassage(payload, () => {
+          slackCall.done();
+
+          done();
+        });
+      });
     });
   });
 });
