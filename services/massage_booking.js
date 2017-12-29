@@ -124,12 +124,7 @@ class MassageBooking {
   }
 
   dateRangeAvailable(userId, dateRange) {
-    const intersectedReservation = this.reservations.find(reservation =>
-      reservation.user.id !== userId &&
-      (
-        (dateRange.start >= reservation.dateRange.start && dateRange.start < reservation.dateRange.end) ||
-        (dateRange.end > reservation.dateRange.start && dateRange.end <= reservation.dateRange.end)
-      ));
+    const intersectedReservation = this.reservations.find(reservation => reservation.user.id !== userId && reservation.dateRange.isIntersecting(dateRange));
     return typeof intersectedReservation === 'undefined';
   }
 

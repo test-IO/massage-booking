@@ -8,4 +8,8 @@ module.exports = class DateRange {
     return this.start.getTime() === dateRange.start.getTime() &&
            this.end.getTime() === dateRange.end.getTime();
   }
+
+  isIntersecting(dateRange) {
+    return this.start < dateRange.end && this.end > dateRange.start;
+  }
 };

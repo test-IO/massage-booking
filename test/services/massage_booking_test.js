@@ -32,7 +32,7 @@ describe('MassageBooking', () => {
     timekeeper.reset();
   });
 
-  describe('#actionHandler', () => {
+  describe('#actionHandler()', () => {
     context('book-massage', () => {
       context('reserve', () => {
         it('clicked on reserve button and the time is available', (done) => {
@@ -302,7 +302,7 @@ describe('MassageBooking', () => {
     });
   });
 
-  describe('#bookMassage', () => {
+  describe('#bookMassage()', () => {
     describe('without providing any parameters', () => {
       it('return find the earliest available time', (done) => {
         let user = new User(faker.random.uuid(), faker.internet.userName());
