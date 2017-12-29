@@ -83,44 +83,59 @@ class MassageBooking {
   }
 
   bookMassage(payload, callback) {
-    const nextAvailabilities = this.findAvailabilities(payload.user_id, 25);
-    const nextAvailabilityString = timeToString(nextAvailabilities[0]);
-    const previousReservation = this.findReservationForUserId(payload.user_id);
-
-    const attachments = [
-      {
-        text: `There is one spot available at ${nextAvailabilityString}, do you want to reserve it?`,
-        color: '#36a64f',
-        callback_id: 'book-massage',
-        attachment_type: 'default',
-        actions: [
-          {
-            name: 'reserve',
-            text: `Yes, reserve ${timeToString(nextAvailabilities[0])} -> ${timeToString(addMinutes(nextAvailabilities[0], this.reservationDuration))}`,
-            type: 'button',
-            value: nextAvailabilityString,
-          },
-          {
-            name: 'reserve',
-            text: 'Pick a another time...',
-            type: 'select',
-            options: nextAvailabilities.map(date => ({
-              text: `${timeToString(date)} -> ${timeToString(addMinutes(date, this.reservationDuration))}`,
-              value: timeToString(date),
-            })),
-          },
-        ],
-      },
-    ];
-
-    if (typeof previousReservation !== 'undefined') {
-      attachments.push({
-        text: `Note: You already have a reservation for ${timeToString(previousReservation.dateRange.start)} -> ${timeToString(previousReservation.dateRange.end)}.\nMaking a new reservation will cancel the previous ones.`,
-        color: '#ffcc00',
+    if (payload.text === 'list') {
+      const now = new Date();
+      const attachments = this.reservations.filter(reservation => reservation.dateRange.end > now).sort((a, b) => a.dateRange.start - b.dateRange.start).map((reservation) => {
+        const attachment = {
+          text: `${timeToString(reservation.dateRange.start)} -> ${timeToString(reservation.dateRange.end)} ${reservation.user.name}`,
+        };
+        if (reservation.user.id === payload.user_id) {
+          attachment.color = '#36a64f';
+        }
+        return attachment;
       });
-    }
 
-    sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
+      sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
+    } else {
+      const nextAvailabilities = this.findAvailabilities(payload.user_id, 25);
+      const nextAvailabilityString = timeToString(nextAvailabilities[0]);
+      const previousReservation = this.findReservationForUserId(payload.user_id);
+
+      const attachments = [
+        {
+          text: `There is one spot available at ${nextAvailabilityString}, do you want to reserve it?`,
+          color: '#36a64f',
+          callback_id: 'book-massage',
+          attachment_type: 'default',
+          actions: [
+            {
+              name: 'reserve',
+              text: `Yes, reserve ${timeToString(nextAvailabilities[0])} -> ${timeToString(addMinutes(nextAvailabilities[0], this.reservationDuration))}`,
+              type: 'button',
+              value: nextAvailabilityString,
+            },
+            {
+              name: 'reserve',
+              text: 'Pick a another time...',
+              type: 'select',
+              options: nextAvailabilities.map(date => ({
+                text: `${timeToString(date)} -> ${timeToString(addMinutes(date, this.reservationDuration))}`,
+                value: timeToString(date),
+              })),
+            },
+          ],
+        },
+      ];
+
+      if (typeof previousReservation !== 'undefined') {
+        attachments.push({
+          text: `Note: You already have a reservation for ${timeToString(previousReservation.dateRange.start)} -> ${timeToString(previousReservation.dateRange.end)}.\nMaking a new reservation will cancel the previous ones.`,
+          color: '#ffcc00',
+        });
+      }
+
+      sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
+    }
   }
 
   dateRangeAvailable(userId, dateRange) {
