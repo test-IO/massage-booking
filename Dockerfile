@@ -1,11 +1,12 @@
 FROM alpine
-MAINTAINER Simon Lacroix <simon@test.io>
+MAINTAINER Simon Lacroix <simon@miaou.be>
 
 RUN apk --update add \
   bash \
   curl \
   nodejs \
   tmux \
+  tzdata \
   vim \
   wget
 

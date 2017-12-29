@@ -1,14 +1,15 @@
 const bodyParser = require('body-parser');
 const express = require('express');
 const logger = require('./logger');
-const MacysBooking = require('./macys_booking');
+const MassageBooking = require('./services/massage_booking');
 const { WebClient } = require('@slack/client');
 
 const app = express();
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 const slackWebClient = new WebClient(process.env.SLACK_API_TOKEN);
-const macysBooking = new MacysBooking(slackWebClient);
+const reservationDuration = parseInt(process.env.RESERVATION_DURATION, 10);
+const massageBooking = new MassageBooking(slackWebClient, reservationDuration);
 
 app.get('/', (req, res) => res.send('Hello World!'));
 
@@ -21,7 +22,7 @@ app.post('/slack/slash-commands/book-massage', urlencodedParser, (req, res) => {
     return;
   }
 
-  macysBooking.bookMassage(payload, (error, response, body) => {
+  massageBooking.bookMassage(payload, (error, response, body) => {
     if (error) {
       logger.error('Error', { method: 'bookMassage', error });
     } else {
@@ -39,7 +40,7 @@ app.post('/slack/actions', urlencodedParser, (req, res) => {
     return;
   }
 
-  macysBooking.actionHandler(payload, (error, response, body) => {
+  massageBooking.actionHandler(payload, (error, response, body) => {
     if (error) {
       logger.error('Error', { method: 'actionHandler', error });
     } else {
