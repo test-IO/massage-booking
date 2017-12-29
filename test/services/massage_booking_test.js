@@ -303,7 +303,7 @@ describe('MassageBooking', () => {
   });
 
   describe('#bookMassage()', () => {
-    describe('without providing any parameters', () => {
+    describe('no params', () => {
       it('return find the earliest available time', (done) => {
         let user = new User(faker.random.uuid(), faker.internet.userName());
         let dateRange = new DateRange(
@@ -565,6 +565,106 @@ describe('MassageBooking', () => {
               },
             ],
           },
+        ];
+        const slackCall = nockSlackCall('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
+
+        massageBooking.bookMassage(payload, () => {
+          slackCall.done();
+
+          done();
+        });
+      });
+    });
+
+    describe('list', () => {
+      it('return list of reservations', (done) => {
+        const names = Array.from(Array(6), () => faker.internet.userName());
+
+        let user = new User(faker.random.uuid(), names[0]);
+        let dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 30, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 50, 0, 0),
+        );
+        massageBooking.reservations.push(new Reservation(user, dateRange));
+
+        user = new User(faker.random.uuid(), names[1]);
+        dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 20, 0, 0),
+        );
+        massageBooking.reservations.push(new Reservation(user, dateRange));
+
+        user = new User('U25PP0KEE', names[2]);
+        dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
+        );
+        massageBooking.reservations.push(new Reservation(user, dateRange));
+
+        user = new User(faker.random.uuid(), names[3]);
+        dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 20, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 40, 0, 0),
+        );
+        massageBooking.reservations.push(new Reservation(user, dateRange));
+
+        user = new User(faker.random.uuid(), names[4]);
+        dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0, 0),
+        );
+        massageBooking.reservations.push(new Reservation(user, dateRange));
+
+        user = new User(faker.random.uuid(), names[5]);
+        dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0),
+        );
+        massageBooking.reservations.push(new Reservation(user, dateRange));
+
+        const payload = {
+          token: '',
+          team_id: 'T25MRFT3M',
+          channel_id: 'C8HTS5MEC',
+          user_id: 'U25PP0KEE',
+          command: '/book-massage',
+          text: 'list',
+          response_url: 'https://hooks.slack.com/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb',
+          trigger_id: '290064239264.73739537123.0cb6e21b315eff944b90b083405e102c',
+        };
+
+        timekeeper.travel(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 27));
+        const attachments = [
+          { text: `10:30 -> 10:50 ${names[0]}` },
+          { text: `11:00 -> 11:20 ${names[2]}`, color: '#36a64f' },
+          { text: `11:20 -> 11:40 ${names[4]}` },
+          { text: `11:40 -> 12:00 ${names[5]}` },
+          { text: `12:00 -> 12:20 ${names[1]}` },
+        ];
+        const slackCall = nockSlackCall('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
+
+        massageBooking.bookMassage(payload, () => {
+          slackCall.done();
+
+          done();
+        });
+      });
+
+      it('return a nice message if there is no reservations yet', (done) => {
+        const payload = {
+          token: '',
+          team_id: 'T25MRFT3M',
+          channel_id: 'C8HTS5MEC',
+          user_id: 'U25PP0KEE',
+          command: '/book-massage',
+          text: 'list',
+          response_url: 'https://hooks.slack.com/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb',
+          trigger_id: '290064239264.73739537123.0cb6e21b315eff944b90b083405e102c',
+        };
+
+        timekeeper.travel(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 27));
+        const attachments = [
+          { text: 'There is no booking yet, book a massage!', color: '#36a64f' },
         ];
         const slackCall = nockSlackCall('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
 
