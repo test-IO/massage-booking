@@ -39,16 +39,15 @@ class MassageBooking {
   }
 
   actionHandler(payload, callback) {
-    const startTime = timeFromString(payload.actions[0].type === 'select' ? payload.actions[0].selected_options[0].value : payload.actions[0].value);
-    const endTime = addMinutes(startTime, this.reservationDuration);
+    const selectedDate = timeFromString(payload.actions[0].type === 'select' ? payload.actions[0].selected_options[0].value : payload.actions[0].value);
+    const dateRange = new DateRange(selectedDate, addMinutes(selectedDate, this.reservationDuration));
 
-    const dateRange = new DateRange(startTime, endTime);
     if (this.dateRangeAvailable(payload.user.id, dateRange)) {
-      const previousReservation = this.findReservationForUser(payload.user.id);
-      this.reservations = this.reservations.filter(reservation => reservation.user.id !== payload.user.id);
-
       const user = new User(payload.user.id, payload.user.name);
-      this.reservations.push(new Reservation(user, dateRange));
+      const previousReservation = this.findReservationForUserId(user.id);
+
+      this.removeReservationsForUserId(user.id);
+      this.addReservation(new Reservation(user, dateRange));
 
       const message = {
         attachments: [],
@@ -56,11 +55,11 @@ class MassageBooking {
       };
       if (typeof previousReservation === 'undefined') {
         message.attachments.push({
-          text: `Thanks for your booking at ${timeToString(startTime)} -> ${timeToString(addMinutes(startTime, this.reservationDuration))}`,
+          text: `Thanks for your booking at ${timeToString(dateRange.start)} -> ${timeToString(dateRange.end)}`,
         });
       } else {
         message.attachments.push({
-          text: `Your booking as been successfully updated to ${timeToString(startTime)} -> ${timeToString(addMinutes(startTime, this.reservationDuration))}`,
+          text: `Your booking as been successfully updated to ${timeToString(dateRange.start)} -> ${timeToString(dateRange.end)}`,
         });
       }
 
@@ -79,10 +78,14 @@ class MassageBooking {
     }
   }
 
+  addReservation(reservation) {
+    this.reservations.push(reservation);
+  }
+
   bookMassage(payload, callback) {
     const nextAvailabilities = this.findAvailabilities(payload.user_id, 25);
     const nextAvailabilityString = timeToString(nextAvailabilities[0]);
-    const previousReservation = this.findReservationForUser(payload.user_id);
+    const previousReservation = this.findReservationForUserId(payload.user_id);
 
     const attachments = [
       {
@@ -130,12 +133,6 @@ class MassageBooking {
     return typeof intersectedReservation === 'undefined';
   }
 
-  findReservationForUser(userId) {
-    const now = new Date();
-    return this.reservations.filter(reservation => reservation.dateRange.end > now)
-      .find(reservation => reservation.user.id === userId);
-  }
-
   findAvailabilities(userId, maxAvalaibilities = 10, minutesPerStep = 5) {
     const availabilities = [];
     let iterator = new Date();
@@ -164,6 +161,17 @@ class MassageBooking {
     }
 
     return availabilities;
+  }
+
+  findReservationForUserId(userId) {
+    const now = new Date();
+    return this.reservations.filter(reservation => reservation.dateRange.end > now)
+      .find(reservation => reservation.user.id === userId);
+  }
+
+  removeReservationsForUserId(userId) {
+    const now = new Date();
+    this.reservations = this.reservations.filter(reservation => reservation.dateRange.end > now && reservation.user.id !== userId);
   }
 }
 
