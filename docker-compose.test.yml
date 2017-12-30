@@ -3,3 +3,5 @@ services:
   sut:
     build: .
     command: bash ./scripts/run_tests_and_linter.sh
+    environment:
+      - SLACK_API_TOKEN=xoxp-00000000000
