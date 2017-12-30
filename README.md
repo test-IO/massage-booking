@@ -27,4 +27,7 @@ docker-compose build
 
 # Run development docker
 docker-compose run --service-ports web
+
+# Reproduce ci tests
+docker-compose -f docker-compose.test.yml build && docker-compose -f docker-compose.test.yml run sut
 ```

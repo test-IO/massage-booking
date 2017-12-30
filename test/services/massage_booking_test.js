@@ -10,6 +10,12 @@ const { WebClient } = require('@slack/client');
 
 nock.disableNetConnect();
 
+function nockFetchUser(userPayload) {
+  return nock('https://slack.com:443', { encodedQueryParams: true })
+    .post('/api/users.info', `user=${userPayload.id}&token=${process.env.SLACK_API_TOKEN}`)
+    .reply(200, { ok: true, user: userPayload });
+}
+
 function nockSlackCall(path, payload) {
   return nock('https://hooks.slack.com:443', { encodedQueryParams: true }).post(path, payload).reply(200, 'ok');
 }
@@ -56,6 +62,13 @@ describe('MassageBooking', () => {
             replace_original: true,
           });
 
+          nockFetchUser({
+            id: 'U25PP0KEE',
+            team_id: 'T25MRFT3M',
+            name: 'simon',
+            real_name: 'Simon Lacroix',
+          });
+
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
 
@@ -64,6 +77,7 @@ describe('MassageBooking', () => {
             const reservation = massageBooking.reservations[0];
             assert.equal(reservation.user.id, 'U25PP0KEE');
             assert.equal(reservation.user.name, 'simon');
+            assert.equal(reservation.user.realName, 'Simon Lacroix');
 
             const dateRange = new DateRange(
               new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 33),
@@ -96,6 +110,13 @@ describe('MassageBooking', () => {
             replace_original: true,
           });
 
+          nockFetchUser({
+            id: 'U25PP0KEE',
+            team_id: 'T25MRFT3M',
+            name: 'simon',
+            real_name: 'Simon Lacroix',
+          });
+
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
 
@@ -104,6 +125,7 @@ describe('MassageBooking', () => {
             const reservation = massageBooking.reservations[0];
             assert.equal(reservation.user.id, 'U25PP0KEE');
             assert.equal(reservation.user.name, 'simon');
+            assert.equal(reservation.user.realName, 'Simon Lacroix');
 
             const dateRange = new DateRange(
               new Date(now.getFullYear(), now.getMonth(), now.getDate(), 15, 45),
@@ -116,7 +138,7 @@ describe('MassageBooking', () => {
         });
 
         it('clicked on reserve button and the time is not available anymore', (done) => {
-          const user = new User(faker.random.uuid(), faker.internet.userName());
+          const user = new User(faker.random.uuid(), faker.internet.userName(), faker.name.findName());
           const dateRange = new DateRange(
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 15, 0, 0),
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 35, 0, 0),
@@ -151,6 +173,7 @@ describe('MassageBooking', () => {
             const reservation = massageBooking.reservations[0];
             assert.equal(reservation.user.id, user.id);
             assert.equal(reservation.user.name, user.name);
+            assert.equal(reservation.user.realName, user.realName);
 
             assert(reservation.dateRange.isEqual(dateRange));
 
@@ -159,7 +182,7 @@ describe('MassageBooking', () => {
         });
 
         it('update the user reservation', (done) => {
-          const user = new User('U25PP0KEE', faker.internet.userName());
+          const user = new User('U25PP0KEE');
           const dateRange = new DateRange(
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 15, 0, 0),
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 35, 0, 0),
@@ -186,6 +209,13 @@ describe('MassageBooking', () => {
             replace_original: true,
           });
 
+          nockFetchUser({
+            id: 'U25PP0KEE',
+            team_id: 'T25MRFT3M',
+            name: 'simon',
+            real_name: 'Simon Lacroix',
+          });
+
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
 
@@ -194,6 +224,7 @@ describe('MassageBooking', () => {
             const reservation = massageBooking.reservations[0];
             assert.equal(reservation.user.id, 'U25PP0KEE');
             assert.equal(reservation.user.name, 'simon');
+            assert.equal(reservation.user.realName, 'Simon Lacroix');
 
             const newDateRange = new DateRange(
               new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 0, 0, 0),
@@ -206,7 +237,7 @@ describe('MassageBooking', () => {
         });
 
         it('ignore past reservations', (done) => {
-          const user = new User('U25PP0KEE', faker.internet.userName());
+          const user = new User('U25PP0KEE');
           const dateRange = new DateRange(
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0, 0, 0),
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 20, 0, 0),
@@ -233,6 +264,13 @@ describe('MassageBooking', () => {
             replace_original: true,
           });
 
+          nockFetchUser({
+            id: 'U25PP0KEE',
+            team_id: 'T25MRFT3M',
+            name: 'simon',
+            real_name: 'Simon Lacroix',
+          });
+
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
 
@@ -241,6 +279,7 @@ describe('MassageBooking', () => {
             const reservation = massageBooking.reservations[0];
             assert.equal(reservation.user.id, 'U25PP0KEE');
             assert.equal(reservation.user.name, 'simon');
+            assert.equal(reservation.user.realName, 'Simon Lacroix');
 
             const newDateRange = new DateRange(
               new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 0, 0, 0),
@@ -253,7 +292,7 @@ describe('MassageBooking', () => {
         });
 
         it('clean past reservations', (done) => {
-          const user = new User(faker.random.uuid(), faker.internet.userName());
+          const user = new User(faker.random.uuid());
           const dateRange = new DateRange(
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 20, 0, 0),
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 40, 0, 0),
@@ -280,6 +319,13 @@ describe('MassageBooking', () => {
             replace_original: true,
           });
 
+          nockFetchUser({
+            id: 'U25PP0KEE',
+            team_id: 'T25MRFT3M',
+            name: 'simon',
+            real_name: 'Simon Lacroix',
+          });
+
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
 
@@ -288,6 +334,7 @@ describe('MassageBooking', () => {
             const reservation = massageBooking.reservations[0];
             assert.equal(reservation.user.id, 'U25PP0KEE');
             assert.equal(reservation.user.name, 'simon');
+            assert.equal(reservation.user.realName, 'Simon Lacroix');
 
             const newDateRange = new DateRange(
               new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 0, 0, 0),
@@ -305,35 +352,35 @@ describe('MassageBooking', () => {
   describe('#bookMassage()', () => {
     describe('no params', () => {
       it('return find the earliest available time', (done) => {
-        let user = new User(faker.random.uuid(), faker.internet.userName());
+        let user = new User(faker.random.uuid());
         let dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 30, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 50, 0, 0),
         );
         massageBooking.reservations.push(new Reservation(user, dateRange));
 
-        user = new User(faker.random.uuid(), faker.internet.userName());
+        user = new User(faker.random.uuid());
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
         );
         massageBooking.reservations.push(new Reservation(user, dateRange));
 
-        user = new User(faker.random.uuid(), faker.internet.userName());
+        user = new User(faker.random.uuid());
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0, 0),
         );
         massageBooking.reservations.push(new Reservation(user, dateRange));
 
-        user = new User(faker.random.uuid(), faker.internet.userName());
+        user = new User(faker.random.uuid());
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 20, 0, 0),
         );
         massageBooking.reservations.push(new Reservation(user, dateRange));
 
-        user = new User(faker.random.uuid(), faker.internet.userName());
+        user = new User(faker.random.uuid());
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 35, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 55, 0, 0),
@@ -410,14 +457,14 @@ describe('MassageBooking', () => {
       });
 
       it('ignore user reservations', (done) => {
-        let user = new User(faker.random.uuid(), faker.internet.userName());
+        let user = new User(faker.random.uuid());
         let dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 30, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 50, 0, 0),
         );
         massageBooking.reservations.push(new Reservation(user, dateRange));
 
-        user = new User('U25PP0KEE', faker.internet.userName());
+        user = new User('U25PP0KEE');
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
@@ -499,7 +546,7 @@ describe('MassageBooking', () => {
       });
 
       it('ignore past reservations', (done) => {
-        const user = new User('U25PP0KEE', faker.internet.userName());
+        const user = new User('U25PP0KEE');
         const dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 10, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 30, 0, 0),
@@ -578,44 +625,44 @@ describe('MassageBooking', () => {
 
     describe('list', () => {
       it('return list of reservations', (done) => {
-        const names = Array.from(Array(6), () => faker.internet.userName());
+        const realNames = Array.from(Array(6), () => faker.name.findName());
 
-        let user = new User(faker.random.uuid(), names[0]);
+        let user = new User(faker.random.uuid(), faker.internet.userName(), realNames[0]);
         let dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 30, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 50, 0, 0),
         );
         massageBooking.reservations.push(new Reservation(user, dateRange));
 
-        user = new User(faker.random.uuid(), names[1]);
+        user = new User(faker.random.uuid(), faker.internet.userName(), realNames[1]);
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 20, 0, 0),
         );
         massageBooking.reservations.push(new Reservation(user, dateRange));
 
-        user = new User('U25PP0KEE', names[2]);
+        user = new User('U25PP0KEE', faker.internet.userName(), realNames[2]);
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
         );
         massageBooking.reservations.push(new Reservation(user, dateRange));
 
-        user = new User(faker.random.uuid(), names[3]);
+        user = new User(faker.random.uuid(), faker.internet.userName(), realNames[3]);
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 20, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 40, 0, 0),
         );
         massageBooking.reservations.push(new Reservation(user, dateRange));
 
-        user = new User(faker.random.uuid(), names[4]);
+        user = new User(faker.random.uuid(), faker.internet.userName(), realNames[4]);
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0, 0),
         );
         massageBooking.reservations.push(new Reservation(user, dateRange));
 
-        user = new User(faker.random.uuid(), names[5]);
+        user = new User(faker.random.uuid(), faker.internet.userName(), realNames[5]);
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0),
@@ -635,11 +682,11 @@ describe('MassageBooking', () => {
 
         timekeeper.travel(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 27));
         const attachments = [
-          { text: `10:30 -> 10:50 ${names[0]}` },
-          { text: `11:00 -> 11:20 ${names[2]}`, color: '#36a64f' },
-          { text: `11:20 -> 11:40 ${names[4]}` },
-          { text: `11:40 -> 12:00 ${names[5]}` },
-          { text: `12:00 -> 12:20 ${names[1]}` },
+          { text: `10:30 -> 10:50   ${realNames[0]}` },
+          { text: `11:00 -> 11:20   ${realNames[2]}`, color: '#36a64f' },
+          { text: `11:20 -> 11:40   ${realNames[4]}` },
+          { text: `11:40 -> 12:00   ${realNames[5]}` },
+          { text: `12:00 -> 12:20   ${realNames[1]}` },
         ];
         const slackCall = nockSlackCall('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
 
