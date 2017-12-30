@@ -349,6 +349,30 @@ describe('MassageBooking', () => {
     });
   });
 
+  describe('#addReservation()', () => {
+    it('notify user when booking start', (done) => {
+      timekeeper.reset();
+
+      const user = new User(faker.random.uuid());
+      const dateRange = new DateRange(
+        new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 0),
+        new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 20),
+      );
+      const reservation = new Reservation(user, dateRange);
+      const slackCall = nock('https://slack.com:443', { encodedQueryParams: true })
+        .post('/api/chat.postMessage', `channel=${user.id}&text=The%20chair%20is%20waiting%20for%20you%2C%20go%20get%20your%20massage%20%3Amassage%3A&token=${process.env.SLACK_API_TOKEN}`)
+        .reply(200, { ok: true });
+
+      massageBooking.addReservation(reservation);
+
+      timekeeper.travel(dateRange.start.getTime() + 3000);
+
+      // slackCall.done();
+
+      done();
+    });
+  });
+
   describe('#bookMassage()', () => {
     describe('no params', () => {
       it('return find the earliest available time', (done) => {

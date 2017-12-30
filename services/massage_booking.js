@@ -86,6 +86,21 @@ class MassageBooking {
 
   addReservation(reservation) {
     this.reservations.push(reservation);
+    //     setTimeout(function() {
+    // this.reservations[0].user.id
+
+    // web.chat.postMessage(this.reservations[0].user.id, 'The chair is waiting for you, go get your massage :massage:', (err, res) => {
+    //   if (err) {
+    //     console.log('Error:', err);
+    //   } else {
+    //     console.log('Message sent: ', res);
+    //   }
+    // });
+    // }, reservation.dateRange.start - Date.now());
+
+    //       setTimeout(function() {
+    // console.log('coucou')
+    // }, 30000);
   }
 
   bookMassage(payload, callback) {
@@ -188,6 +203,16 @@ class MassageBooking {
     return this.reservations.filter(reservation => reservation.dateRange.end > now)
       .find(reservation => reservation.user.id === userId);
   }
+
+  // notifyUser(){
+  // this.slackWebClient.chat.postMessage(this.reservations[0].user.id, 'The chair is waiting for you, go get your massage :massage:', (err, res) => {
+  //   if (err) {
+  //     console.log('Error:', err);
+  //   } else {
+  //     console.log('Message sent: ', res);
+  //   }
+  // });
+  // }
 
   findUserById(userId, callback) {
     this.slackWebClient.users.info(userId, (error, result) => {
