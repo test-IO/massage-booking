@@ -3,7 +3,7 @@
 // const token = process.env.SLACK_API_TOKEN || '';
 // const web = new WebClient(token);
 
-// web.users.info('U8JN20LTX', (err, res) => {
+// web.users.info('U25PP0KEE', (err, res) => {
 //   if (err) {
 //     console.log('Error:', err);
 //   } else {

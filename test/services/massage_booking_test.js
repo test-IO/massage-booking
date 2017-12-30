@@ -10,6 +10,12 @@ const { WebClient } = require('@slack/client');
 
 nock.disableNetConnect();
 
+function nockFetchUser(userPayload) {
+  return nock('https://slack.com:443', { encodedQueryParams: true })
+    .post('/api/users.info', `user=${userPayload.id}&token=${process.env.SLACK_API_TOKEN}`)
+    .reply(200, { ok: true, user: userPayload });
+}
+
 function nockSlackCall(path, payload) {
   return nock('https://hooks.slack.com:443', { encodedQueryParams: true }).post(path, payload).reply(200, 'ok');
 }
@@ -56,6 +62,13 @@ describe('MassageBooking', () => {
             replace_original: true,
           });
 
+          nockFetchUser({
+            id: 'U25PP0KEE',
+            team_id: 'T25MRFT3M',
+            name: 'simon',
+            real_name: 'Simon Lacroix',
+          });
+
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
 
@@ -64,6 +77,7 @@ describe('MassageBooking', () => {
             const reservation = massageBooking.reservations[0];
             assert.equal(reservation.user.id, 'U25PP0KEE');
             assert.equal(reservation.user.name, 'simon');
+            assert.equal(reservation.user.realName, 'Simon Lacroix');
 
             const dateRange = new DateRange(
               new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 33),
@@ -96,6 +110,13 @@ describe('MassageBooking', () => {
             replace_original: true,
           });
 
+          nockFetchUser({
+            id: 'U25PP0KEE',
+            team_id: 'T25MRFT3M',
+            name: 'simon',
+            real_name: 'Simon Lacroix',
+          });
+
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
 
@@ -104,6 +125,7 @@ describe('MassageBooking', () => {
             const reservation = massageBooking.reservations[0];
             assert.equal(reservation.user.id, 'U25PP0KEE');
             assert.equal(reservation.user.name, 'simon');
+            assert.equal(reservation.user.realName, 'Simon Lacroix');
 
             const dateRange = new DateRange(
               new Date(now.getFullYear(), now.getMonth(), now.getDate(), 15, 45),
@@ -151,7 +173,7 @@ describe('MassageBooking', () => {
             const reservation = massageBooking.reservations[0];
             assert.equal(reservation.user.id, user.id);
             assert.equal(reservation.user.name, user.name);
-            assert.equal(reservation.user.realName, user.realName)
+            assert.equal(reservation.user.realName, user.realName);
 
             assert(reservation.dateRange.isEqual(dateRange));
 
@@ -187,6 +209,13 @@ describe('MassageBooking', () => {
             replace_original: true,
           });
 
+          nockFetchUser({
+            id: 'U25PP0KEE',
+            team_id: 'T25MRFT3M',
+            name: 'simon',
+            real_name: 'Simon Lacroix',
+          });
+
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
 
@@ -195,6 +224,7 @@ describe('MassageBooking', () => {
             const reservation = massageBooking.reservations[0];
             assert.equal(reservation.user.id, 'U25PP0KEE');
             assert.equal(reservation.user.name, 'simon');
+            assert.equal(reservation.user.realName, 'Simon Lacroix');
 
             const newDateRange = new DateRange(
               new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 0, 0, 0),
@@ -234,6 +264,13 @@ describe('MassageBooking', () => {
             replace_original: true,
           });
 
+          nockFetchUser({
+            id: 'U25PP0KEE',
+            team_id: 'T25MRFT3M',
+            name: 'simon',
+            real_name: 'Simon Lacroix',
+          });
+
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
 
@@ -242,6 +279,7 @@ describe('MassageBooking', () => {
             const reservation = massageBooking.reservations[0];
             assert.equal(reservation.user.id, 'U25PP0KEE');
             assert.equal(reservation.user.name, 'simon');
+            assert.equal(reservation.user.realName, 'Simon Lacroix');
 
             const newDateRange = new DateRange(
               new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 0, 0, 0),
@@ -281,6 +319,13 @@ describe('MassageBooking', () => {
             replace_original: true,
           });
 
+          nockFetchUser({
+            id: 'U25PP0KEE',
+            team_id: 'T25MRFT3M',
+            name: 'simon',
+            real_name: 'Simon Lacroix',
+          });
+
           massageBooking.actionHandler(payload, () => {
             slackCall.done();
 
@@ -289,6 +334,7 @@ describe('MassageBooking', () => {
             const reservation = massageBooking.reservations[0];
             assert.equal(reservation.user.id, 'U25PP0KEE');
             assert.equal(reservation.user.name, 'simon');
+            assert.equal(reservation.user.realName, 'Simon Lacroix');
 
             const newDateRange = new DateRange(
               new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 0, 0, 0),

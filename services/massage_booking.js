@@ -43,27 +43,33 @@ class MassageBooking {
     const dateRange = new DateRange(selectedDate, addMinutes(selectedDate, this.reservationDuration));
 
     if (this.dateRangeAvailable(payload.user.id, dateRange)) {
-      const user = new User(payload.user.id, payload.user.name);
-      const previousReservation = this.findReservationForUserId(user.id);
+      this.findUserById(payload.user.id, (error, user) => {
+        if (error) {
+          callback(error);
+          return;
+        }
 
-      this.removeReservationsForUserId(user.id);
-      this.addReservation(new Reservation(user, dateRange));
+        const previousReservation = this.findReservationForUserId(user.id);
 
-      const message = {
-        attachments: [],
-        replace_original: true,
-      };
-      if (typeof previousReservation === 'undefined') {
-        message.attachments.push({
-          text: `Thanks for your booking at ${timeToString(dateRange.start)} -> ${timeToString(dateRange.end)}`,
-        });
-      } else {
-        message.attachments.push({
-          text: `Your booking as been successfully updated to ${timeToString(dateRange.start)} -> ${timeToString(dateRange.end)}`,
-        });
-      }
+        this.removeReservationsForUserId(user.id);
+        this.addReservation(new Reservation(user, dateRange));
 
-      sendMessageToSlackResponseUrl(payload.response_url, message, callback);
+        const message = {
+          attachments: [],
+          replace_original: true,
+        };
+        if (typeof previousReservation === 'undefined') {
+          message.attachments.push({
+            text: `Thanks for your booking at ${timeToString(dateRange.start)} -> ${timeToString(dateRange.end)}`,
+          });
+        } else {
+          message.attachments.push({
+            text: `Your booking as been successfully updated to ${timeToString(dateRange.start)} -> ${timeToString(dateRange.end)}`,
+          });
+        }
+
+        sendMessageToSlackResponseUrl(payload.response_url, message, callback);
+      });
     } else {
       const message = {
         attachments: [
@@ -181,6 +187,16 @@ class MassageBooking {
     const now = new Date();
     return this.reservations.filter(reservation => reservation.dateRange.end > now)
       .find(reservation => reservation.user.id === userId);
+  }
+
+  findUserById(userId, callback) {
+    this.slackWebClient.users.info(userId, (error, result) => {
+      if (error) {
+        callback(undefined);
+      } else {
+        callback(undefined, new User(result.user.id, result.user.name, result.user.real_name));
+      }
+    });
   }
 
   removeReservationsForUserId(userId) {
