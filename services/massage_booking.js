@@ -87,7 +87,7 @@ class MassageBooking {
       const now = new Date();
       const attachments = this.reservations.filter(reservation => reservation.dateRange.end > now).sort((a, b) => a.dateRange.start - b.dateRange.start).map((reservation) => {
         const attachment = {
-          text: `${timeToString(reservation.dateRange.start)} -> ${timeToString(reservation.dateRange.end)} ${reservation.user.name}`,
+          text: `${timeToString(reservation.dateRange.start)} -> ${timeToString(reservation.dateRange.end)}   ${reservation.user.realName}`,
         };
         if (reservation.user.id === payload.user_id) {
           attachment.color = '#36a64f';

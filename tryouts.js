@@ -3,13 +3,38 @@
 // const token = process.env.SLACK_API_TOKEN || '';
 // const web = new WebClient(token);
 
-// web.chat.postMessage('slack-bots', 'Hello there', (err, res) => {
+// web.users.info('U8JN20LTX', (err, res) => {
+//   if (err) {
+//     console.log('Error:', err);
+//   } else {
+//     console.log(res);
+//     console.log(res.user.id);
+//     console.log(res.user.name);
+//     console.log(res.user.display_name);
+//     console.log(res.user.real_name);
+//   }
+// });
+
+// web.users.list((err, res) => {
+//   if (err) {
+//     console.log('Error:', err);
+//   } else {
+//     console.log(res);
+//   }
+// });
+
+// web.chat.postMessage('U25PP0KEE', 'Hello there', (err, res) => {
 //   if (err) {
 //     console.log('Error:', err);
 //   } else {
 //     console.log('Message sent: ', res);
 //   }
 // });
+
+// const { WebClient } = require('@slack/client');
+
+// const token = process.env.SLACK_API_TOKEN || '';
+// const web = new WebClient(token);
 
 // web.channels.list((err, info) => {
 //   if (err) {
