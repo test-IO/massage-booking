@@ -13,8 +13,8 @@ class BookingRepository {
         reject(error);
       });
 
-      redisClient.lpush('bookings', booking.toJson(), () => {
-        resolve();
+      redisClient.sadd('bookings', booking.toJson(), (error) => {
+        if (error) { reject(error); } else { resolve(); }
         redisClient.quit();
       });
     }));
@@ -27,8 +27,12 @@ class BookingRepository {
         reject(error);
       });
 
-      redisClient.lrange('bookings', 0, -1, (err, replies) => {
-        resolve(replies.map(reply => Booking.parseJson(reply)));
+      redisClient.smembers('bookings', (error, replies) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(replies.map(reply => Booking.parseJson(reply)));
+        }
         redisClient.quit();
       });
     }));
@@ -47,8 +51,23 @@ class BookingRepository {
         reject(error);
       });
 
-      redisClient.del('bookings', () => {
-        resolve();
+      redisClient.del('bookings', (error) => {
+        if (error) { reject(error); } else { resolve(); }
+        redisClient.quit();
+      });
+    }));
+  }
+
+  remove(booking) {
+    const thiz = this;
+    return new Promise(((resolve, reject) => {
+      const redisClient = thiz.createRedisClient((error) => {
+        reject(error);
+      });
+
+      redisClient.srem('bookings', booking.toJson(), (error) => {
+        if (error) { reject(error); } else { resolve(); }
+
         redisClient.quit();
       });
     }));

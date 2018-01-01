@@ -32,12 +32,32 @@ describe('BookingRepository', () => {
   describe('#add()', () => {
     it('allow to add new booking', (done) => {
       const repository = new BookingRepository();
-      const booking = newBooking();
+      const bookings = Array.from(Array(3), () => newBooking());
 
-      repository.add(booking).then(() => {
-        repository.all().then((bookings) => {
-          assert(bookings.find(b => b.isEqual(booking)));
+      Promise.all(bookings.map(b => repository.add(b))).then(() => {
+        repository.all().then((bookingList) => {
+          bookingList.forEach((booking) => {
+            assert(bookingList.find(b => b.isEqual(booking)));
+          });
           done();
+        }).catch(done);
+      }).catch(done);
+    });
+  });
+
+  describe('#remove()', () => {
+    it('allow to remove a booking', (done) => {
+      const repository = new BookingRepository();
+      const bookings = Array.from(Array(3), () => newBooking());
+
+      Promise.all(bookings.map(b => repository.add(b))).then(() => {
+        repository.remove(bookings[1]).then(() => {
+          repository.all().then((bookingList) => {
+            assert(bookingList.find(b => b.isEqual(bookings[0])));
+            assert(!bookingList.find(b => b.isEqual(bookings[1])));
+            assert(bookingList.find(b => b.isEqual(bookings[2])));
+            done();
+          });
         }).catch(done);
       }).catch(done);
     });
