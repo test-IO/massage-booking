@@ -1,6 +1,6 @@
+const Booking = require('../models/booking');
 const DateRange = require('../models/date_range');
 const request = require('request');
-const Reservation = require('../models/reservation');
 const User = require('../models/user');
 
 function addMinutes(date, minutes) {
@@ -49,10 +49,10 @@ class MassageBooking {
           return;
         }
 
-        const previousReservation = this.findReservationForUserId(user.id);
+        const previousReservation = this.findBookingForUserId(user.id);
 
-        this.removeReservationsForUserId(user.id);
-        this.addReservation(new Reservation(user, dateRange));
+        this.removeBookingsForUserId(user.id);
+        this.addBooking(new Booking(user, dateRange));
 
         const message = {
           attachments: [],
@@ -84,7 +84,7 @@ class MassageBooking {
     }
   }
 
-  addReservation(reservation) {
+  addBooking(reservation) {
     this.reservations.push(reservation);
   }
 
@@ -109,7 +109,7 @@ class MassageBooking {
     } else {
       const nextAvailabilities = this.findAvailabilities(payload.user_id, 25);
       const nextAvailabilityString = timeToString(nextAvailabilities[0]);
-      const previousReservation = this.findReservationForUserId(payload.user_id);
+      const previousReservation = this.findBookingForUserId(payload.user_id);
 
       const attachments = [
         {
@@ -139,7 +139,7 @@ class MassageBooking {
 
       if (typeof previousReservation !== 'undefined') {
         attachments.push({
-          text: `Note: You already have a reservation for ${timeToString(previousReservation.dateRange.start)} -> ${timeToString(previousReservation.dateRange.end)}.\nMaking a new reservation will cancel the previous ones.`,
+          text: `Note: You already have a booking for ${timeToString(previousReservation.dateRange.start)} -> ${timeToString(previousReservation.dateRange.end)}.\nMaking a new booking will cancel the previous ones.`,
           color: '#ffcc00',
         });
       }
@@ -183,7 +183,7 @@ class MassageBooking {
     return availabilities;
   }
 
-  findReservationForUserId(userId) {
+  findBookingForUserId(userId) {
     const now = new Date();
     return this.reservations.filter(reservation => reservation.dateRange.end > now)
       .find(reservation => reservation.user.id === userId);
@@ -199,7 +199,7 @@ class MassageBooking {
     });
   }
 
-  removeReservationsForUserId(userId) {
+  removeBookingsForUserId(userId) {
     const now = new Date();
     this.reservations = this.reservations.filter(reservation => reservation.dateRange.end > now && reservation.user.id !== userId);
   }

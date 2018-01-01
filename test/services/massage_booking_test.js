@@ -1,9 +1,9 @@
 const assert = require('assert');
+const Booking = require('../../models/booking');
 const DateRange = require('../../models/date_range');
 const faker = require('faker');
 const MassageBooking = require('../../services/massage_booking');
 const nock = require('nock');
-const Reservation = require('../../models/reservation');
 const timekeeper = require('timekeeper');
 const User = require('../../models/user');
 const { WebClient } = require('@slack/client');
@@ -144,7 +144,7 @@ describe('MassageBooking', () => {
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 35, 0, 0),
           );
 
-          massageBooking.reservations.push(new Reservation(user, dateRange));
+          massageBooking.reservations.push(new Booking(user, dateRange));
           const payload = {
             type: 'interactive_message',
             actions: [{ name: 'reserve', type: 'button', value: '14:00' }],
@@ -187,7 +187,7 @@ describe('MassageBooking', () => {
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 15, 0, 0),
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 35, 0, 0),
           );
-          massageBooking.reservations.push(new Reservation(user, dateRange));
+          massageBooking.reservations.push(new Booking(user, dateRange));
 
           const payload = {
             type: 'interactive_message',
@@ -242,7 +242,7 @@ describe('MassageBooking', () => {
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0, 0, 0),
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 20, 0, 0),
           );
-          massageBooking.reservations.push(new Reservation(user, dateRange));
+          massageBooking.reservations.push(new Booking(user, dateRange));
 
           const payload = {
             type: 'interactive_message',
@@ -297,7 +297,7 @@ describe('MassageBooking', () => {
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 20, 0, 0),
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 40, 0, 0),
           );
-          massageBooking.reservations.push(new Reservation(user, dateRange));
+          massageBooking.reservations.push(new Booking(user, dateRange));
 
           const payload = {
             type: 'interactive_message',
@@ -357,35 +357,35 @@ describe('MassageBooking', () => {
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 30, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 50, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
         user = new User(faker.random.uuid());
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
         user = new User(faker.random.uuid());
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
         user = new User(faker.random.uuid());
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 20, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
         user = new User(faker.random.uuid());
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 35, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 55, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
         const payload = {
           token: '',
@@ -462,14 +462,14 @@ describe('MassageBooking', () => {
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 30, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 50, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
         user = new User('U25PP0KEE');
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
 
         const payload = {
@@ -532,7 +532,7 @@ describe('MassageBooking', () => {
             ],
           },
           {
-            text: 'Note: You already have a reservation for 11:00 -> 11:20.\nMaking a new reservation will cancel the previous ones.',
+            text: 'Note: You already have a booking for 11:00 -> 11:20.\nMaking a new booking will cancel the previous ones.',
             color: '#ffcc00',
           },
         ];
@@ -551,7 +551,7 @@ describe('MassageBooking', () => {
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 10, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 30, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
         const payload = {
           token: '',
@@ -632,42 +632,42 @@ describe('MassageBooking', () => {
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 30, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 50, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
         user = new User(faker.random.uuid(), faker.internet.userName(), realNames[1]);
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 20, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
         user = new User('U25PP0KEE', faker.internet.userName(), realNames[2]);
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
         user = new User(faker.random.uuid(), faker.internet.userName(), realNames[3]);
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 20, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 40, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
         user = new User(faker.random.uuid(), faker.internet.userName(), realNames[4]);
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 20, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
         user = new User(faker.random.uuid(), faker.internet.userName(), realNames[5]);
         dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0, 0),
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0),
         );
-        massageBooking.reservations.push(new Reservation(user, dateRange));
+        massageBooking.reservations.push(new Booking(user, dateRange));
 
         const payload = {
           token: '',
