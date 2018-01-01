@@ -6,35 +6,52 @@ class BookingRepository {
     this.redisOptions = { host: 'redis', prefix: 'test' };
   }
 
-  add(booking, callback) {
-    const redisClient = this.createRedisClient();
+  add(booking) {
+    const thiz = this;
+    return new Promise(((resolve, reject) => {
+      const redisClient = thiz.createRedisClient((error) => {
+        reject(error);
+      });
 
-    redisClient.lpush('bookings', booking.toJson(), () => {
-      callback();
-      redisClient.quit();
-    });
+      redisClient.lpush('bookings', booking.toJson(), () => {
+        resolve();
+        redisClient.quit();
+      });
+    }));
   }
 
-  all(callback) {
-    const redisClient = this.createRedisClient();
+  all() {
+    const thiz = this;
+    return new Promise(((resolve, reject) => {
+      const redisClient = thiz.createRedisClient((error) => {
+        reject(error);
+      });
 
-    redisClient.lrange('bookings', 0, -1, (err, replies) => {
-      callback(replies.map(reply => Booking.parseJson(reply)));
-      redisClient.quit();
-    });
+      redisClient.lrange('bookings', 0, -1, (err, replies) => {
+        resolve(replies.map(reply => Booking.parseJson(reply)));
+        redisClient.quit();
+      });
+    }));
   }
 
-  createRedisClient() {
-    return redis.createClient(this.redisOptions);
+  createRedisClient(errorCallback) {
+    const client = redis.createClient(this.redisOptions);
+    client.on('error', errorCallback);
+    return client;
   }
 
-  flush(callback) {
-    const redisClient = this.createRedisClient();
+  flush() {
+    const thiz = this;
+    return new Promise(((resolve, reject) => {
+      const redisClient = thiz.createRedisClient((error) => {
+        reject(error);
+      });
 
-    redisClient.del('bookings', () => {
-      callback();
-      redisClient.quit();
-    });
+      redisClient.del('bookings', () => {
+        resolve();
+        redisClient.quit();
+      });
+    }));
   }
 }
 

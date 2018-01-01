@@ -16,9 +16,9 @@ describe('BookingRepository', () => {
     it('persist data so all repository have the same', (done) => {
       const booking = newBooking();
 
-      new BookingRepository().flush(() => {
-        new BookingRepository().add(booking, () => {
-          new BookingRepository().all((bookings) => {
+      new BookingRepository().flush().then(() => {
+        new BookingRepository().add(booking).then(() => {
+          new BookingRepository().all().then((bookings) => {
             assert(bookings.find(b => b.isEqual(booking)));
             done();
           });
@@ -32,9 +32,9 @@ describe('BookingRepository', () => {
       const repository = new BookingRepository();
       const booking = newBooking();
 
-      repository.flush(() => {
-        repository.add(booking, () => {
-          repository.all((bookings) => {
+      repository.flush().then(() => {
+        repository.add(booking).then(() => {
+          repository.all().then((bookings) => {
             assert(bookings.find(b => b.isEqual(booking)));
             done();
           });

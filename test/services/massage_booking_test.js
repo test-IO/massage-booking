@@ -35,7 +35,7 @@ describe('MassageBooking', () => {
     now.setMinutes(0);
     timekeeper.freeze(now);
 
-    new BookingRepository().flush(done);
+    new BookingRepository().flush().then(done);
   });
 
   afterEach(() => {
