@@ -8,8 +8,6 @@ const timekeeper = require('timekeeper');
 const User = require('../../models/user');
 const { WebClient } = require('@slack/client');
 
-nock.disableNetConnect();
-
 function nockFetchUser(userPayload) {
   return nock('https://slack.com:443', { encodedQueryParams: true })
     .post('/api/users.info', `user=${userPayload.id}&token=${process.env.SLACK_API_TOKEN}`)
@@ -25,6 +23,8 @@ describe('MassageBooking', () => {
   let now;
 
   beforeEach(() => {
+    nock.disableNetConnect();
+
     const slackWebClient = new WebClient(process.env.SLACK_API_TOKEN);
     massageBooking = new MassageBooking(slackWebClient);
 
@@ -36,6 +36,8 @@ describe('MassageBooking', () => {
 
   afterEach(() => {
     timekeeper.reset();
+
+    nock.enableNetConnect();
   });
 
   describe('#actionHandler()', () => {
