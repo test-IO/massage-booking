@@ -33,16 +33,16 @@ function timeToString(date) {
 
 
 class MassageBooking {
-  constructor(slackWebClient, reservationDuration = 20) {
-    this.reservationDuration = reservationDuration;
+  constructor(slackWebClient, bookingDuration = 20) {
     this.reservations = [];
+    this.bookingDuration = bookingDuration;
     this.bookingRepository = new BookingRepository();
     this.slackWebClient = slackWebClient;
   }
 
   actionHandler(payload, callback) {
     const selectedDate = timeFromString(payload.actions[0].type === 'select' ? payload.actions[0].selected_options[0].value : payload.actions[0].value);
-    const dateRange = new DateRange(selectedDate, addMinutes(selectedDate, this.reservationDuration));
+    const dateRange = new DateRange(selectedDate, addMinutes(selectedDate, this.bookingDuration));
 
     if (this.dateRangeAvailable(payload.user.id, dateRange)) {
       this.findUserById(payload.user.id, (error, user) => {
@@ -122,7 +122,7 @@ class MassageBooking {
           actions: [
             {
               name: 'reserve',
-              text: `Yes, reserve ${timeToString(nextAvailabilities[0])} -> ${timeToString(addMinutes(nextAvailabilities[0], this.reservationDuration))}`,
+              text: `Yes, reserve ${timeToString(nextAvailabilities[0])} -> ${timeToString(addMinutes(nextAvailabilities[0], this.bookingDuration))}`,
               type: 'button',
               value: nextAvailabilityString,
             },
@@ -131,7 +131,7 @@ class MassageBooking {
               text: 'Pick a another time...',
               type: 'select',
               options: nextAvailabilities.map(date => ({
-                text: `${timeToString(date)} -> ${timeToString(addMinutes(date, this.reservationDuration))}`,
+                text: `${timeToString(date)} -> ${timeToString(addMinutes(date, this.bookingDuration))}`,
                 value: timeToString(date),
               })),
             },
@@ -175,7 +175,7 @@ class MassageBooking {
     iterator.setMilliseconds(0);
 
     while (availabilities.length < maxAvalaibilities && iterator < maxAvalaibilityDate) {
-      const dateRange = new DateRange(iterator, addMinutes(iterator, this.reservationDuration));
+      const dateRange = new DateRange(iterator, addMinutes(iterator, this.bookingDuration));
       if (this.dateRangeAvailable(userId, dateRange)) {
         availabilities.push(new Date(iterator));
       }
