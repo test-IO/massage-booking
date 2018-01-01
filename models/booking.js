@@ -1,8 +1,14 @@
-module.exports = class Booking {
-  static parseJson(json) {
-    JSON.parse(json);
+const DateRange = require('./date_range');
+const User = require('./user');
 
-    return new Booking();
+module.exports = class Booking {
+  static parseJson(jsonString) {
+    const json = JSON.parse(jsonString);
+
+    const user = new User(json.user.id, json.user.name, json.user.realName);
+    const dateRange = new DateRange(new Date(json.dateRange.start), new Date(json.dateRange.end));
+
+    return new Booking(user, dateRange);
   }
 
   constructor(user, dateRange) {
@@ -11,7 +17,7 @@ module.exports = class Booking {
   }
 
   isEqual(booking) {
-    return true;
+    return this.user.id === booking.user.id && this.dateRange.isEqual(booking.dateRange);
   }
 
   toJson() {
