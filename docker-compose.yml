@@ -12,3 +12,7 @@ services:
       - redis
   redis:
     image: redis
+    volumes:
+      - redis_data:/data
+volumes:
+  redis_data:

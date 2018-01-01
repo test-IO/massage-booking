@@ -5,3 +5,11 @@ services:
     env_file: variables.stack.env
     ports:
       - '3001:3000'
+    depends_on:
+      - redis
+  redis:
+    image: redis
+    volumes:
+      - redis_data:/data
+volumes:
+  redis_data:
