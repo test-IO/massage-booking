@@ -21,9 +21,9 @@ describe('BookingRepository', () => {
           new BookingRepository().all().then((bookings) => {
             assert(bookings.find(b => b.isEqual(booking)));
             done();
-          });
-        });
-      });
+          }).catch(done);
+        }).catch(done);
+      }).catch(done);
     });
   });
 
@@ -37,9 +37,9 @@ describe('BookingRepository', () => {
           repository.all().then((bookings) => {
             assert(bookings.find(b => b.isEqual(booking)));
             done();
-          });
-        });
-      });
+          }).catch(done);
+        }).catch(done);
+      }).catch(done);
     });
   });
 });
