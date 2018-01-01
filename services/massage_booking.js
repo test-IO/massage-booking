@@ -1,4 +1,5 @@
 const Booking = require('../models/booking');
+const BookingRepository = require('../services/booking_repository');
 const DateRange = require('../models/date_range');
 const request = require('request');
 const User = require('../models/user');
@@ -35,6 +36,7 @@ class MassageBooking {
   constructor(slackWebClient, reservationDuration = 20) {
     this.reservationDuration = reservationDuration;
     this.reservations = [];
+    this.bookingRepository = new BookingRepository();
     this.slackWebClient = slackWebClient;
   }
 

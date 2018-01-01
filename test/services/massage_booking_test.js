@@ -1,5 +1,6 @@
 const assert = require('assert');
 const Booking = require('../../models/booking');
+const BookingRepository = require('../../services/booking_repository');
 const DateRange = require('../../models/date_range');
 const faker = require('faker');
 const MassageBooking = require('../../services/massage_booking');
@@ -22,8 +23,9 @@ describe('MassageBooking', () => {
   let massageBooking;
   let now;
 
-  beforeEach(() => {
+  beforeEach((done) => {
     nock.disableNetConnect();
+    nock.enableNetConnect('redis');
 
     const slackWebClient = new WebClient(process.env.SLACK_API_TOKEN);
     massageBooking = new MassageBooking(slackWebClient);
@@ -32,6 +34,8 @@ describe('MassageBooking', () => {
     now.setHours(9);
     now.setMinutes(0);
     timekeeper.freeze(now);
+
+    new BookingRepository().flush(done);
   });
 
   afterEach(() => {
