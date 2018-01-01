@@ -12,16 +12,18 @@ function newBooking() {
 }
 
 describe('BookingRepository', () => {
+  beforeEach((done) => {
+    new BookingRepository().flush().then(done).catch(done);
+  });
+
   describe('#all()', () => {
     it('persist data so all repository have the same', (done) => {
       const booking = newBooking();
 
-      new BookingRepository().flush().then(() => {
-        new BookingRepository().add(booking).then(() => {
-          new BookingRepository().all().then((bookings) => {
-            assert(bookings.find(b => b.isEqual(booking)));
-            done();
-          }).catch(done);
+      new BookingRepository().add(booking).then(() => {
+        new BookingRepository().all().then((bookings) => {
+          assert(bookings.find(b => b.isEqual(booking)));
+          done();
         }).catch(done);
       }).catch(done);
     });
@@ -32,12 +34,10 @@ describe('BookingRepository', () => {
       const repository = new BookingRepository();
       const booking = newBooking();
 
-      repository.flush().then(() => {
-        repository.add(booking).then(() => {
-          repository.all().then((bookings) => {
-            assert(bookings.find(b => b.isEqual(booking)));
-            done();
-          }).catch(done);
+      repository.add(booking).then(() => {
+        repository.all().then((bookings) => {
+          assert(bookings.find(b => b.isEqual(booking)));
+          done();
         }).catch(done);
       }).catch(done);
     });
