@@ -8,6 +8,37 @@ function addMinutes(date, minutes) {
   return new Date(date.getTime() + (60000 * minutes));
 }
 
+
+function findAvailabilitiesForUserId(bookings, userId, bookingDuration, maxAvalaibilities = 10, minutesPerStep = 5) {
+  const availabilities = [];
+  let iterator = new Date();
+  const maxAvalaibilityDate = new Date(iterator.getFullYear(), iterator.getMonth(), iterator.getDate(), 23, 59, 999);
+
+  if (iterator.getMinutes() % 5 <= 3) {
+    iterator.setMinutes(iterator.getMinutes() - (iterator.getMinutes() % 5));
+  } else {
+    const newMinutes = iterator.getMinutes() + (5 - (iterator.getMinutes() % 5));
+    if (newMinutes === 60) {
+      iterator.setHours(iterator.getHours() + 1);
+      iterator.setMinutes(0);
+    } else {
+      iterator.setMinutes(newMinutes);
+    }
+  }
+  iterator.setSeconds(0);
+  iterator.setMilliseconds(0);
+
+  while (availabilities.length < maxAvalaibilities && iterator < maxAvalaibilityDate) {
+    const dateRange = new DateRange(iterator, addMinutes(iterator, bookingDuration));
+    const booking = bookings.find(b => b.user.id !== userId && b.dateRange.isIntersecting(dateRange));
+    if (typeof booking === 'undefined') {
+      availabilities.push(new Date(iterator));
+    }
+    iterator = addMinutes(iterator, minutesPerStep);
+  }
+  return availabilities;
+}
+
 function sendMessageToSlackResponseUrl(responseUrl, jsonMessage, callback) {
   const postOptions = {
     uri: responseUrl,
@@ -116,87 +147,48 @@ class MassageBooking {
         sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
       });
     } else {
-      this.findAvailabilities(payload.user_id, 25, (error, nextAvailabilities) => {
-        if (error) {
-          callback(error);
-          return;
+      this.bookingRepository.all().catch(callback).then((bookings) => {
+        const nextAvailabilities = findAvailabilitiesForUserId(bookings, payload.user_id, this.bookingDuration, 25);
+        const nextAvailabilityString = timeToString(nextAvailabilities[0]);
+        const now = new Date();
+        const previousBooking = bookings.filter(booking => booking.dateRange.end > now).find(booking => booking.user.id === payload.user_id);
+
+        const attachments = [
+          {
+            text: `There is one spot available at ${nextAvailabilityString}, do you want to book it?`,
+            color: '#36a64f',
+            callback_id: 'book-massage',
+            attachment_type: 'default',
+            actions: [
+              {
+                name: 'book',
+                text: `Yes, book ${timeToString(nextAvailabilities[0])} -> ${timeToString(addMinutes(nextAvailabilities[0], this.bookingDuration))}`,
+                type: 'button',
+                value: nextAvailabilityString,
+              },
+              {
+                name: 'book',
+                text: 'Pick a another time...',
+                type: 'select',
+                options: nextAvailabilities.map(date => ({
+                  text: `${timeToString(date)} -> ${timeToString(addMinutes(date, this.bookingDuration))}`,
+                  value: timeToString(date),
+                })),
+              },
+            ],
+          },
+        ];
+
+        if (typeof previousBooking !== 'undefined') {
+          attachments.push({
+            text: `Note: You already have a booking for ${timeToString(previousBooking.dateRange.start)} -> ${timeToString(previousBooking.dateRange.end)}.\nMaking a new booking will cancel the previous ones.`,
+            color: '#ffcc00',
+          });
         }
 
-        this.bookingRepository.all().catch(callback).then((bookings) => {
-          const nextAvailabilityString = timeToString(nextAvailabilities[0]);
-          const now = new Date();
-          const previousBooking = bookings.filter(booking => booking.dateRange.end > now).find(booking => booking.user.id === payload.user_id);
-
-          const attachments = [
-            {
-              text: `There is one spot available at ${nextAvailabilityString}, do you want to book it?`,
-              color: '#36a64f',
-              callback_id: 'book-massage',
-              attachment_type: 'default',
-              actions: [
-                {
-                  name: 'book',
-                  text: `Yes, book ${timeToString(nextAvailabilities[0])} -> ${timeToString(addMinutes(nextAvailabilities[0], this.bookingDuration))}`,
-                  type: 'button',
-                  value: nextAvailabilityString,
-                },
-                {
-                  name: 'book',
-                  text: 'Pick a another time...',
-                  type: 'select',
-                  options: nextAvailabilities.map(date => ({
-                    text: `${timeToString(date)} -> ${timeToString(addMinutes(date, this.bookingDuration))}`,
-                    value: timeToString(date),
-                  })),
-                },
-              ],
-            },
-          ];
-
-          if (typeof previousBooking !== 'undefined') {
-            attachments.push({
-              text: `Note: You already have a booking for ${timeToString(previousBooking.dateRange.start)} -> ${timeToString(previousBooking.dateRange.end)}.\nMaking a new booking will cancel the previous ones.`,
-              color: '#ffcc00',
-            });
-          }
-
-          sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
-        });
+        sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
       });
     }
-  }
-
-  findAvailabilities(userId, maxAvalaibilities = 10, callback) {
-    const minutesPerStep = 5;
-    const availabilities = [];
-    let iterator = new Date();
-    const maxAvalaibilityDate = new Date(iterator.getFullYear(), iterator.getMonth(), iterator.getDate(), 23, 59, 999);
-
-    if (iterator.getMinutes() % 5 <= 3) {
-      iterator.setMinutes(iterator.getMinutes() - (iterator.getMinutes() % 5));
-    } else {
-      const newMinutes = iterator.getMinutes() + (5 - (iterator.getMinutes() % 5));
-      if (newMinutes === 60) {
-        iterator.setHours(iterator.getHours() + 1);
-        iterator.setMinutes(0);
-      } else {
-        iterator.setMinutes(newMinutes);
-      }
-    }
-    iterator.setSeconds(0);
-    iterator.setMilliseconds(0);
-
-    this.bookingRepository.all().catch(callback).then((bookings) => {
-      while (availabilities.length < maxAvalaibilities && iterator < maxAvalaibilityDate) {
-        const dateRange = new DateRange(iterator, addMinutes(iterator, this.bookingDuration));
-        const booking = bookings.find(b => b.user.id !== userId && b.dateRange.isIntersecting(dateRange));
-        if (typeof booking === 'undefined') {
-          availabilities.push(new Date(iterator));
-        }
-        iterator = addMinutes(iterator, minutesPerStep);
-      }
-      callback(null, availabilities);
-    });
   }
 
   findUserById(userId, callback) {
