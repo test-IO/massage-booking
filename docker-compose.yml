@@ -4,6 +4,10 @@ services:
     build: .
     command: bash
     env_file: variables.env
+    environment:
+      - BOOKING_DURATION=20
+      - LOG_LEVEL=debug
+      - REDIS_HOST=redis
     ports:
       - '3000:3000'
     volumes:

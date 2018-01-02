@@ -12,16 +12,18 @@ function newBooking() {
 }
 
 describe('BookingRepository', () => {
+  const redisOptions = { host: process.env.REDIS_HOST, prefix: 'test' };
+
   beforeEach((done) => {
-    new BookingRepository().flush().then(done).catch(done);
+    new BookingRepository(redisOptions).flush().then(done).catch(done);
   });
 
   describe('#all()', () => {
     it('persist data so all repository have the same', (done) => {
       const booking = newBooking();
 
-      new BookingRepository().add(booking).then(() => {
-        new BookingRepository().all().then((bookings) => {
+      new BookingRepository(redisOptions).add(booking).then(() => {
+        new BookingRepository(redisOptions).all().then((bookings) => {
           assert(bookings.find(b => b.isEqual(booking)));
           done();
         }).catch(done);
@@ -31,7 +33,7 @@ describe('BookingRepository', () => {
 
   describe('#add()', () => {
     it('allow to add new booking', (done) => {
-      const repository = new BookingRepository();
+      const repository = new BookingRepository(redisOptions);
       const bookings = Array.from(Array(3), () => newBooking());
 
       Promise.all(bookings.map(b => repository.add(b))).then(() => {
@@ -47,7 +49,7 @@ describe('BookingRepository', () => {
 
   describe('#remove()', () => {
     it('allow to remove a booking', (done) => {
-      const repository = new BookingRepository();
+      const repository = new BookingRepository(redisOptions);
       const bookings = Array.from(Array(3), () => newBooking());
 
       Promise.all(bookings.map(b => repository.add(b))).then(() => {

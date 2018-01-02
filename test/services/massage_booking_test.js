@@ -20,23 +20,24 @@ function nockSlackCall(path, payload) {
 }
 
 describe('MassageBooking', () => {
+  const redisOptions = { host: process.env.REDIS_HOST, prefix: 'test' };
   let bookingRepository;
   let massageBooking;
   let now;
 
   beforeEach((done) => {
     nock.disableNetConnect();
-    nock.enableNetConnect('redis');
+    nock.enableNetConnect(process.env.REDIS_HOST);
 
     const slackWebClient = new WebClient(process.env.SLACK_API_TOKEN);
-    massageBooking = new MassageBooking(slackWebClient);
+    massageBooking = new MassageBooking(slackWebClient, redisOptions);
 
     now = new Date();
     now.setHours(9);
     now.setMinutes(0);
     timekeeper.freeze(now);
 
-    bookingRepository = new BookingRepository();
+    bookingRepository = new BookingRepository(redisOptions);
     bookingRepository.flush().then(done).catch(done);
   });
 

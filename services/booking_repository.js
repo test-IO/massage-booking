@@ -2,8 +2,8 @@ const redis = require('redis');
 const Booking = require('../models/booking.js');
 
 class BookingRepository {
-  constructor() {
-    this.redisOptions = { host: 'redis', prefix: 'test' };
+  constructor(redisOptions) {
+    this.redisOptions = redisOptions;
   }
 
   add(booking) {

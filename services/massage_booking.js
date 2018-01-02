@@ -64,9 +64,9 @@ function timeToString(date) {
 
 
 class MassageBooking {
-  constructor(slackWebClient, bookingDuration = 20) {
+  constructor(slackWebClient, redisOptions, bookingDuration = 20) {
     this.bookingDuration = bookingDuration;
-    this.bookingRepository = new BookingRepository();
+    this.bookingRepository = new BookingRepository(redisOptions);
     this.slackWebClient = slackWebClient;
   }
 
