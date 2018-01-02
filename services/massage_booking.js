@@ -53,8 +53,8 @@ class MassageBooking {
           }
 
           const now = new Date();
-          const previousReservation = bookings.filter(reservation => reservation.dateRange.end > now)
-            .find(reservation => reservation.user.id === user.id);
+          const previousBooking = bookings.filter(booking => booking.dateRange.end > now)
+            .find(booking => booking.user.id === user.id);
 
           bookings.forEach((booking) => {
             if (booking.user.id === user.id) {
@@ -67,7 +67,7 @@ class MassageBooking {
               attachments: [],
               replace_original: true,
             };
-            if (typeof previousReservation === 'undefined') {
+            if (typeof previousBooking === 'undefined') {
               message.attachments.push({
                 text: `Thanks for your booking at ${timeToString(dateRange.start)} -> ${timeToString(dateRange.end)}`,
               });
@@ -99,11 +99,11 @@ class MassageBooking {
     if (payload.text === 'list') {
       const now = new Date();
       this.bookingRepository.all().catch(callback).then((bookings) => {
-        const attachments = bookings.filter(reservation => reservation.dateRange.end > now).sort((a, b) => a.dateRange.start - b.dateRange.start).map((reservation) => {
+        const attachments = bookings.filter(booking => booking.dateRange.end > now).sort((a, b) => a.dateRange.start - b.dateRange.start).map((booking) => {
           const attachment = {
-            text: `${timeToString(reservation.dateRange.start)} -> ${timeToString(reservation.dateRange.end)}   ${reservation.user.realName}`,
+            text: `${timeToString(booking.dateRange.start)} -> ${timeToString(booking.dateRange.end)}   ${booking.user.realName}`,
           };
-          if (reservation.user.id === payload.user_id) {
+          if (booking.user.id === payload.user_id) {
             attachment.color = '#36a64f';
           }
           return attachment;
@@ -125,7 +125,7 @@ class MassageBooking {
         this.bookingRepository.all().catch(callback).then((bookings) => {
           const nextAvailabilityString = timeToString(nextAvailabilities[0]);
           const now = new Date();
-          const previousReservation = bookings.filter(booking => booking.dateRange.end > now).find(booking => booking.user.id === payload.user_id);
+          const previousBooking = bookings.filter(booking => booking.dateRange.end > now).find(booking => booking.user.id === payload.user_id);
 
           const attachments = [
             {
@@ -153,9 +153,9 @@ class MassageBooking {
             },
           ];
 
-          if (typeof previousReservation !== 'undefined') {
+          if (typeof previousBooking !== 'undefined') {
             attachments.push({
-              text: `Note: You already have a booking for ${timeToString(previousReservation.dateRange.start)} -> ${timeToString(previousReservation.dateRange.end)}.\nMaking a new booking will cancel the previous ones.`,
+              text: `Note: You already have a booking for ${timeToString(previousBooking.dateRange.start)} -> ${timeToString(previousBooking.dateRange.end)}.\nMaking a new booking will cancel the previous ones.`,
               color: '#ffcc00',
             });
           }

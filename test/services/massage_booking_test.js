@@ -48,8 +48,8 @@ describe('MassageBooking', () => {
 
   describe('#actionHandler()', () => {
     context('book-massage', () => {
-      context('reserve', () => {
-        it('clicked on reserve button and the time is available', (done) => {
+      context('book', () => {
+        it('clicked on book button and the time is available', (done) => {
           const payload = {
             type: 'interactive_message',
             actions: [{ name: 'book', type: 'button', value: '17:33' }],
@@ -254,7 +254,7 @@ describe('MassageBooking', () => {
           });
         });
 
-        it('ignore past reservations', (done) => {
+        it('ignore past bookings', (done) => {
           const user = new User('U25PP0KEE');
           const dateRange = new DateRange(
             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0, 0, 0),
@@ -517,7 +517,7 @@ describe('MassageBooking', () => {
         });
       });
 
-      it('ignore past reservations', (done) => {
+      it('ignore past bookings', (done) => {
         const user = new User('U25PP0KEE');
         const dateRange = new DateRange(
           new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 10, 0, 0),
@@ -597,7 +597,7 @@ describe('MassageBooking', () => {
     });
 
     describe('list', () => {
-      it('return list of reservations', (done) => {
+      it('return list of bookings', (done) => {
         const realNames = Array.from(Array(6), () => faker.name.findName());
         const bookings = [];
 
@@ -673,7 +673,7 @@ describe('MassageBooking', () => {
         });
       });
 
-      it('return a nice message if there is no reservations yet', (done) => {
+      it('return a nice message if there is no bookings yet', (done) => {
         const payload = {
           token: '',
           team_id: 'T25MRFT3M',
