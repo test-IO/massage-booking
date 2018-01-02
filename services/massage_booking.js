@@ -75,8 +75,8 @@ class MassageBooking {
     const dateRange = new DateRange(selectedDate, addMinutes(selectedDate, this.bookingDuration));
 
     this.bookingRepository.all().catch(callback).then((bookings) => {
-      const bookingaaaa = bookings.find(b => b.user.id !== payload.user.id && b.dateRange.isIntersecting(dateRange));
-      if (typeof bookingaaaa === 'undefined') {
+      const overlappingBooking = bookings.find(b => b.user.id !== payload.user.id && b.dateRange.isIntersecting(dateRange));
+      if (typeof overlappingBooking === 'undefined') {
         this.findUserById(payload.user.id, (error, user) => {
           if (error) {
             callback(error);
