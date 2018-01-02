@@ -4,4 +4,10 @@ services:
     build: .
     command: bash ./scripts/run_tests_and_linter.sh
     environment:
+      - LOG_LEVEL=debug
+      - REDIS_HOST=redis
       - SLACK_API_TOKEN=xoxp-00000000000
+    depends_on:
+      - redis
+  redis:
+    image: redis

@@ -7,9 +7,11 @@ const { WebClient } = require('@slack/client');
 const app = express();
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
-const slackWebClient = new WebClient(process.env.SLACK_API_TOKEN);
-const reservationDuration = parseInt(process.env.RESERVATION_DURATION, 10);
-const massageBooking = new MassageBooking(slackWebClient, reservationDuration);
+const massageBooking = new MassageBooking(
+  new WebClient(process.env.SLACK_API_TOKEN),
+  { host: process.env.REDIS_HOST },
+  parseInt(process.env.BOOKING_DURATION, 10),
+);
 
 app.get('/', (req, res) => res.send('Hello World!'));
 

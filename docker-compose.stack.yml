@@ -3,5 +3,17 @@ services:
   web:
     image: simonmiaou/massage-booking
     env_file: variables.stack.env
+    environment:
+      - BOOKING_DURATION=20
+      - LOG_LEVEL=error
+      - REDIS_HOST=redis
     ports:
       - '3001:3000'
+    depends_on:
+      - redis
+  redis:
+    image: redis
+    volumes:
+      - redis_data:/data
+volumes:
+  redis_data:
