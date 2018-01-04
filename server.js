@@ -15,7 +15,7 @@ const massageBooking = new MassageBooking(
 
 app.get('/', (req, res) => res.send('Hello World!'));
 
-app.post('/slack/slash-commands/book-massage', urlencodedParser, (req, res) => {
+app.post('/slack/slash-commands/massage_booking', urlencodedParser, (req, res) => {
   res.status(200).end();
   const payload = req.body;
 
