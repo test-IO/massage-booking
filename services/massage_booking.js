@@ -8,7 +8,6 @@ function addMinutes(date, minutes) {
   return new Date(date.getTime() + (60000 * minutes));
 }
 
-
 function findAvailabilitiesForUserId(bookings, userId, bookingDuration, maxAvalaibilities = 10, minutesPerStep = 5) {
   const availabilities = [];
   let iterator = new Date();
