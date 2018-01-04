@@ -1,5 +1,5 @@
 FROM alpine
-MAINTAINER Simon Lacroix <simon@miaou.be>
+MAINTAINER Simon Lacroix <simon@test.io>
 
 RUN apk --update add \
   bash \
