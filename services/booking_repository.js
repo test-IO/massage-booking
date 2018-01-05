@@ -7,9 +7,8 @@ class BookingRepository {
   }
 
   add(booking) {
-    const thiz = this;
-    return new Promise(((resolve, reject) => {
-      const redisClient = thiz.createRedisClient((error) => {
+    return new Promise((resolve, reject) => {
+      const redisClient = this.createRedisClient((error) => {
         reject(error);
       });
 
@@ -17,13 +16,12 @@ class BookingRepository {
         if (error) { reject(error); } else { resolve(); }
         redisClient.quit();
       });
-    }));
+    });
   }
 
   all() {
-    const thiz = this;
-    return new Promise(((resolve, reject) => {
-      const redisClient = thiz.createRedisClient((error) => {
+    return new Promise((resolve, reject) => {
+      const redisClient = this.createRedisClient((error) => {
         reject(error);
       });
 
@@ -35,7 +33,7 @@ class BookingRepository {
         }
         redisClient.quit();
       });
-    }));
+    });
   }
 
   createRedisClient(errorCallback) {
@@ -45,9 +43,8 @@ class BookingRepository {
   }
 
   flush() {
-    const thiz = this;
-    return new Promise(((resolve, reject) => {
-      const redisClient = thiz.createRedisClient((error) => {
+    return new Promise((resolve, reject) => {
+      const redisClient = this.createRedisClient((error) => {
         reject(error);
       });
 
@@ -55,13 +52,12 @@ class BookingRepository {
         if (error) { reject(error); } else { resolve(); }
         redisClient.quit();
       });
-    }));
+    });
   }
 
   remove(booking) {
-    const thiz = this;
-    return new Promise(((resolve, reject) => {
-      const redisClient = thiz.createRedisClient((error) => {
+    return new Promise((resolve, reject) => {
+      const redisClient = this.createRedisClient((error) => {
         reject(error);
       });
 
@@ -70,7 +66,7 @@ class BookingRepository {
 
         redisClient.quit();
       });
-    }));
+    });
   }
 }
 

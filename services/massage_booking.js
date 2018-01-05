@@ -8,7 +8,6 @@ function addMinutes(date, minutes) {
   return new Date(date.getTime() + (60000 * minutes));
 }
 
-
 function findAvailabilitiesForUserId(bookings, userId, bookingDuration, maxAvalaibilities = 10, minutesPerStep = 5) {
   const availabilities = [];
   let iterator = new Date();
@@ -189,6 +188,28 @@ class MassageBooking {
         sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
       });
     }
+  }
+
+  notifyUserOfBooking() {
+    return new Promise((resolve, reject) => {
+      this.bookingRepository.all().catch(reject).then((bookings) => {
+        const now = new Date();
+        const booking = bookings.find(b => b.dateRange.start < now && b.dateRange.end > now);
+
+        if (typeof booking !== 'undefined') {
+          if (typeof this.lastNotifiedBooking === 'undefined' || !this.lastNotifiedBooking.isEqual(booking)) {
+            this.slackWebClient.chat.postMessage(booking.user.id, 'The chair is waiting for you, go get your massage :massage:', (err, res) => {
+              if (err) {
+                reject(err);
+              } else {
+                this.lastNotifiedBooking = booking;
+                resolve(res);
+              }
+            });
+          } else { resolve(); }
+        } else { resolve(); }
+      });
+    });
   }
 
   findUserById(userId, callback) {

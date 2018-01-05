@@ -13,6 +13,13 @@ const massageBooking = new MassageBooking(
   parseInt(process.env.BOOKING_DURATION, 10),
 );
 
+
+// To send notifications to users when their booking start
+setInterval(() => {
+  massageBooking.notifyUserOfBooking();
+}, 1000);
+
+
 app.get('/', (req, res) => res.send('Hello World!'));
 
 app.post('/slack/slash-commands/massage_booking', urlencodedParser, (req, res) => {

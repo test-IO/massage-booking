@@ -700,4 +700,77 @@ describe('MassageBooking', () => {
       });
     });
   });
+
+  describe('#notifyUserOfBooking()', () => {
+    it('send a private message to the user of the current booking', (done) => {
+      const user = new User(faker.random.uuid(), faker.internet.userName(), faker.name.findName());
+      const dateRange = new DateRange(
+        new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0, 0),
+        new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 20, 0, 0),
+      );
+
+      bookingRepository.add(new Booking(user, dateRange)).catch(done).then(() => {
+        const slackCall = nock('https://slack.com:443', { encodedQueryParams: true })
+          .post('/api/chat.postMessage', `channel=${user.id}&text=The%20chair%20is%20waiting%20for%20you%2C%20go%20get%20your%20massage%20%3Amassage%3A&token=${process.env.SLACK_API_TOKEN}`)
+          .reply(200, { ok: true });
+
+        timekeeper.travel(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 1));
+
+        massageBooking.notifyUserOfBooking().catch(done).then(() => {
+          slackCall.done();
+          done();
+        });
+      });
+    });
+
+    it('doesnt do anything if there is no booking currently', (done) => {
+      const bookings = [];
+
+      let user = new User(faker.random.uuid(), faker.internet.userName(), faker.name.findName());
+      let dateRange = new DateRange(
+        new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0, 0),
+        new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 20, 0, 0),
+      );
+      bookings.push(new Booking(user, dateRange));
+
+      user = new User(faker.random.uuid(), faker.internet.userName(), faker.name.findName());
+      dateRange = new DateRange(
+        new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 30, 0, 0),
+        new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 50, 0, 0),
+      );
+      bookings.push(new Booking(user, dateRange));
+
+      Promise.all(bookings.map(booking => bookingRepository.add(booking))).catch(done).then(() => {
+        timekeeper.travel(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 25));
+
+        massageBooking.notifyUserOfBooking().catch(done).then(() => {
+          done();
+        });
+      });
+    });
+
+    it('notify only once per booking', (done) => {
+      const user = new User(faker.random.uuid(), faker.internet.userName(), faker.name.findName());
+      const dateRange = new DateRange(
+        new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0, 0),
+        new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 20, 0, 0),
+      );
+
+      bookingRepository.add(new Booking(user, dateRange)).catch(done).then(() => {
+        const slackCall = nock('https://slack.com:443', { encodedQueryParams: true })
+          .post('/api/chat.postMessage', `channel=${user.id}&text=The%20chair%20is%20waiting%20for%20you%2C%20go%20get%20your%20massage%20%3Amassage%3A&token=${process.env.SLACK_API_TOKEN}`)
+          .reply(200, { ok: true });
+
+        timekeeper.travel(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 1));
+
+        massageBooking.notifyUserOfBooking().catch(done).then(() => {
+          slackCall.done();
+
+          massageBooking.notifyUserOfBooking().catch(done).then(() => {
+            done();
+          });
+        });
+      });
+    });
+  });
 });

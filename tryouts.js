@@ -1,3 +1,8 @@
+// const nock = require('nock');
+
+// nock.disableNetConnect();
+// nock.recorder.rec();
+
 // const { WebClient } = require('@slack/client');
 
 // const token = process.env.SLACK_API_TOKEN || '';
@@ -23,7 +28,7 @@
 //   }
 // });
 
-// web.chat.postMessage('U25PP0KEE', 'Hello there', (err, res) => {
+// web.chat.postMessage('U25PP0KEE', 'The chair is waiting for you, go get your massage :massage:', (err, res) => {
 //   if (err) {
 //     console.log('Error:', err);
 //   } else {
