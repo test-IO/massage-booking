@@ -12,8 +12,8 @@ RUN apk --update add \
 
 WORKDIR /app
 
-ADD package.json ./
-ADD package-lock.json ./
+ADD package.json .
+ADD package-lock.json .
 RUN npm install
 
 ADD . .
