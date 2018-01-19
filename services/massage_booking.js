@@ -11,7 +11,7 @@ function addMinutes(date, minutes) {
 function findAvailabilitiesForUserId(bookings, userId, bookingDuration, maxAvalaibilities = 10, minutesPerStep = 5) {
   const availabilities = [];
   let iterator = new Date();
-  const maxAvalaibilityDate = new Date(iterator.getFullYear(), iterator.getMonth(), iterator.getDate(), 23, 59, 999);
+  const maxAvalaibilityDate = addMinutes(new Date(), 3600 * 24);
 
   if (iterator.getMinutes() % 5 <= 3) {
     iterator.setMinutes(iterator.getMinutes() - (iterator.getMinutes() % 5));
