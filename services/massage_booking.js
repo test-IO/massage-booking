@@ -48,12 +48,6 @@ function sendMessageToSlackResponseUrl(responseUrl, jsonMessage, callback) {
   request(postOptions, callback);
 }
 
-function timeFromString(string) {
-  const now = new Date();
-  const [hours, minutes] = string.split(':').map(x => parseInt(x, 10));
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
-}
-
 function timeToString(date) {
   if (date.getMinutes() < 10) {
     return `${date.getHours()}:0${date.getMinutes()}`;
@@ -70,7 +64,7 @@ class MassageBooking {
   }
 
   actionHandler(payload, callback) {
-    const selectedDate = timeFromString(payload.actions[0].type === 'select' ? payload.actions[0].selected_options[0].value : payload.actions[0].value);
+    const selectedDate = new Date(payload.actions[0].type === 'select' ? payload.actions[0].selected_options[0].value : payload.actions[0].value);
     const dateRange = new DateRange(selectedDate, addMinutes(selectedDate, this.bookingDuration));
 
     this.bookingRepository.all().catch(callback).then((bookings) => {
@@ -148,13 +142,12 @@ class MassageBooking {
     } else {
       this.bookingRepository.all().catch(callback).then((bookings) => {
         const nextAvailabilities = findAvailabilitiesForUserId(bookings, payload.user_id, this.bookingDuration, 25);
-        const nextAvailabilityString = timeToString(nextAvailabilities[0]);
         const now = new Date();
         const previousBooking = bookings.filter(booking => booking.dateRange.end > now).find(booking => booking.user.id === payload.user_id);
 
         const attachments = [
           {
-            text: `There is one spot available at ${nextAvailabilityString}, do you want to book it?`,
+            text: `There is one spot available at ${timeToString(nextAvailabilities[0])}, do you want to book it?`,
             color: '#36a64f',
             callback_id: 'book-massage',
             attachment_type: 'default',
@@ -163,7 +156,7 @@ class MassageBooking {
                 name: 'book',
                 text: `Yes, book ${timeToString(nextAvailabilities[0])} -> ${timeToString(addMinutes(nextAvailabilities[0], this.bookingDuration))}`,
                 type: 'button',
-                value: nextAvailabilityString,
+                value: nextAvailabilities[0],
               },
               {
                 name: 'book',
@@ -171,7 +164,7 @@ class MassageBooking {
                 type: 'select',
                 options: nextAvailabilities.map(date => ({
                   text: `${timeToString(date)} -> ${timeToString(addMinutes(date, this.bookingDuration))}`,
-                  value: timeToString(date),
+                  value: date,
                 })),
               },
             ],
