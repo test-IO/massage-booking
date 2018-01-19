@@ -8,10 +8,10 @@ function addMinutes(date, minutes) {
   return new Date(date.getTime() + (60000 * minutes));
 }
 
-function findAvailabilitiesForUserId(bookings, userId, bookingDuration, maxAvalaibilities = 10, minutesPerStep = 5) {
+function findAvailabilitiesForUserId(bookings, userId, bookingDuration, minutesPerStep = 5) {
   const availabilities = [];
   let iterator = new Date();
-  const maxAvalaibilityDate = new Date(iterator.getFullYear(), iterator.getMonth(), iterator.getDate(), 23, 59, 999);
+  const maxAvalaibilityDate = addMinutes(new Date(), 3600 * 24);
 
   if (iterator.getMinutes() % 5 <= 3) {
     iterator.setMinutes(iterator.getMinutes() - (iterator.getMinutes() % 5));
@@ -27,7 +27,7 @@ function findAvailabilitiesForUserId(bookings, userId, bookingDuration, maxAvala
   iterator.setSeconds(0);
   iterator.setMilliseconds(0);
 
-  while (availabilities.length < maxAvalaibilities && iterator < maxAvalaibilityDate) {
+  while (iterator < maxAvalaibilityDate) {
     const dateRange = new DateRange(iterator, addMinutes(iterator, bookingDuration));
     const booking = bookings.find(b => b.user.id !== userId && b.dateRange.isIntersecting(dateRange));
     if (typeof booking === 'undefined') {
@@ -141,7 +141,7 @@ class MassageBooking {
       });
     } else {
       this.bookingRepository.all().catch(callback).then((bookings) => {
-        const nextAvailabilities = findAvailabilitiesForUserId(bookings, payload.user_id, this.bookingDuration, 25);
+        const nextAvailabilities = findAvailabilitiesForUserId(bookings, payload.user_id, this.bookingDuration);
         const now = new Date();
         const previousBooking = bookings.filter(booking => booking.dateRange.end > now).find(booking => booking.user.id === payload.user_id);
 

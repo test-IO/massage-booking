@@ -3,8 +3,10 @@ const Booking = require('../../models/booking');
 const BookingRepository = require('../../services/booking_repository');
 const DateRange = require('../../models/date_range');
 const faker = require('faker');
+const fs = require('fs');
 const MassageBooking = require('../../services/massage_booking');
 const nock = require('nock');
+const path = require('path');
 const timekeeper = require('timekeeper');
 const User = require('../../models/user');
 const { WebClient } = require('@slack/client');
@@ -15,8 +17,17 @@ function nockFetchUser(userPayload) {
     .reply(200, { ok: true, user: userPayload });
 }
 
-function nockSlackCall(path, payload) {
-  return nock('https://hooks.slack.com:443', { encodedQueryParams: true }).post(path, payload).reply(200, 'ok');
+function nockSlackCall(queryPath, payload) {
+  return nock('https://hooks.slack.com:443', { encodedQueryParams: true })
+    .post(queryPath, payload)
+    .reply(200, 'ok');
+}
+
+function nockSlackCallWithoutOptions(queryPath, payload) {
+  return nock('https://hooks.slack.com:443', { encodedQueryParams: true })
+    .filteringRequestBody(/("options":\[([\w{}": ->]+)])/, '"options":[]')
+    .post(queryPath, payload)
+    .reply(200, 'ok');
 }
 
 describe('MassageBooking', () => {
@@ -367,54 +378,7 @@ describe('MassageBooking', () => {
           };
 
           timekeeper.travel(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 27));
-          const attachments = [
-            {
-              text: 'There is one spot available at 11:40, do you want to book it?',
-              color: '#36a64f',
-              callback_id: 'book-massage',
-              attachment_type: 'default',
-              actions: [
-                {
-                  name: 'book',
-                  text: 'Yes, book 11:40 -> 12:00',
-                  type: 'button',
-                  value: '2018-01-19T11:40:00.000Z',
-                },
-                {
-                  name: 'book',
-                  text: 'Pick a another time...',
-                  type: 'select',
-                  options: [
-                    { text: '11:40 -> 12:00', value: '2018-01-19T11:40:00.000Z' },
-                    { text: '12:20 -> 12:40', value: '2018-01-19T12:20:00.000Z' },
-                    { text: '12:25 -> 12:45', value: '2018-01-19T12:25:00.000Z' },
-                    { text: '12:30 -> 12:50', value: '2018-01-19T12:30:00.000Z' },
-                    { text: '12:35 -> 12:55', value: '2018-01-19T12:35:00.000Z' },
-                    { text: '12:40 -> 13:00', value: '2018-01-19T12:40:00.000Z' },
-                    { text: '12:45 -> 13:05', value: '2018-01-19T12:45:00.000Z' },
-                    { text: '12:50 -> 13:10', value: '2018-01-19T12:50:00.000Z' },
-                    { text: '12:55 -> 13:15', value: '2018-01-19T12:55:00.000Z' },
-                    { text: '13:00 -> 13:20', value: '2018-01-19T13:00:00.000Z' },
-                    { text: '13:05 -> 13:25', value: '2018-01-19T13:05:00.000Z' },
-                    { text: '13:10 -> 13:30', value: '2018-01-19T13:10:00.000Z' },
-                    { text: '13:15 -> 13:35', value: '2018-01-19T13:15:00.000Z' },
-                    { text: '13:55 -> 14:15', value: '2018-01-19T13:55:00.000Z' },
-                    { text: '14:00 -> 14:20', value: '2018-01-19T14:00:00.000Z' },
-                    { text: '14:05 -> 14:25', value: '2018-01-19T14:05:00.000Z' },
-                    { text: '14:10 -> 14:30', value: '2018-01-19T14:10:00.000Z' },
-                    { text: '14:15 -> 14:35', value: '2018-01-19T14:15:00.000Z' },
-                    { text: '14:20 -> 14:40', value: '2018-01-19T14:20:00.000Z' },
-                    { text: '14:25 -> 14:45', value: '2018-01-19T14:25:00.000Z' },
-                    { text: '14:30 -> 14:50', value: '2018-01-19T14:30:00.000Z' },
-                    { text: '14:35 -> 14:55', value: '2018-01-19T14:35:00.000Z' },
-                    { text: '14:40 -> 15:00', value: '2018-01-19T14:40:00.000Z' },
-                    { text: '14:45 -> 15:05', value: '2018-01-19T14:45:00.000Z' },
-                    { text: '14:50 -> 15:10', value: '2018-01-19T14:50:00.000Z' },
-                  ],
-                },
-              ],
-            },
-          ];
+          const attachments = JSON.parse(fs.readFileSync(path.resolve('./test/fixtures/bookMassage-return-find-the-earliest-available-time.json')));
           const slackCall = nockSlackCall('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
 
           massageBooking.bookMassage(payload, () => {
@@ -471,33 +435,7 @@ describe('MassageBooking', () => {
                   name: 'book',
                   text: 'Pick a another time...',
                   type: 'select',
-                  options: [
-                    { text: '10:50 -> 11:10', value: '2018-01-19T10:50:00.000Z' },
-                    { text: '10:55 -> 11:15', value: '2018-01-19T10:55:00.000Z' },
-                    { text: '11:00 -> 11:20', value: '2018-01-19T11:00:00.000Z' },
-                    { text: '11:05 -> 11:25', value: '2018-01-19T11:05:00.000Z' },
-                    { text: '11:10 -> 11:30', value: '2018-01-19T11:10:00.000Z' },
-                    { text: '11:15 -> 11:35', value: '2018-01-19T11:15:00.000Z' },
-                    { text: '11:20 -> 11:40', value: '2018-01-19T11:20:00.000Z' },
-                    { text: '11:25 -> 11:45', value: '2018-01-19T11:25:00.000Z' },
-                    { text: '11:30 -> 11:50', value: '2018-01-19T11:30:00.000Z' },
-                    { text: '11:35 -> 11:55', value: '2018-01-19T11:35:00.000Z' },
-                    { text: '11:40 -> 12:00', value: '2018-01-19T11:40:00.000Z' },
-                    { text: '11:45 -> 12:05', value: '2018-01-19T11:45:00.000Z' },
-                    { text: '11:50 -> 12:10', value: '2018-01-19T11:50:00.000Z' },
-                    { text: '11:55 -> 12:15', value: '2018-01-19T11:55:00.000Z' },
-                    { text: '12:00 -> 12:20', value: '2018-01-19T12:00:00.000Z' },
-                    { text: '12:05 -> 12:25', value: '2018-01-19T12:05:00.000Z' },
-                    { text: '12:10 -> 12:30', value: '2018-01-19T12:10:00.000Z' },
-                    { text: '12:15 -> 12:35', value: '2018-01-19T12:15:00.000Z' },
-                    { text: '12:20 -> 12:40', value: '2018-01-19T12:20:00.000Z' },
-                    { text: '12:25 -> 12:45', value: '2018-01-19T12:25:00.000Z' },
-                    { text: '12:30 -> 12:50', value: '2018-01-19T12:30:00.000Z' },
-                    { text: '12:35 -> 12:55', value: '2018-01-19T12:35:00.000Z' },
-                    { text: '12:40 -> 13:00', value: '2018-01-19T12:40:00.000Z' },
-                    { text: '12:45 -> 13:05', value: '2018-01-19T12:45:00.000Z' },
-                    { text: '12:50 -> 13:10', value: '2018-01-19T12:50:00.000Z' },
-                  ],
+                  options: [],
                 },
               ],
             },
@@ -506,7 +444,7 @@ describe('MassageBooking', () => {
               color: '#ffcc00',
             },
           ];
-          const slackCall = nockSlackCall('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
+          const slackCall = nockSlackCallWithoutOptions('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
 
           massageBooking.bookMassage(payload, () => {
             slackCall.done();
@@ -553,38 +491,12 @@ describe('MassageBooking', () => {
                   name: 'book',
                   text: 'Pick a another time...',
                   type: 'select',
-                  options: [
-                    { text: '10:25 -> 10:45', value: '2018-01-19T10:25:00.000Z' },
-                    { text: '10:30 -> 10:50', value: '2018-01-19T10:30:00.000Z' },
-                    { text: '10:35 -> 10:55', value: '2018-01-19T10:35:00.000Z' },
-                    { text: '10:40 -> 11:00', value: '2018-01-19T10:40:00.000Z' },
-                    { text: '10:45 -> 11:05', value: '2018-01-19T10:45:00.000Z' },
-                    { text: '10:50 -> 11:10', value: '2018-01-19T10:50:00.000Z' },
-                    { text: '10:55 -> 11:15', value: '2018-01-19T10:55:00.000Z' },
-                    { text: '11:00 -> 11:20', value: '2018-01-19T11:00:00.000Z' },
-                    { text: '11:05 -> 11:25', value: '2018-01-19T11:05:00.000Z' },
-                    { text: '11:10 -> 11:30', value: '2018-01-19T11:10:00.000Z' },
-                    { text: '11:15 -> 11:35', value: '2018-01-19T11:15:00.000Z' },
-                    { text: '11:20 -> 11:40', value: '2018-01-19T11:20:00.000Z' },
-                    { text: '11:25 -> 11:45', value: '2018-01-19T11:25:00.000Z' },
-                    { text: '11:30 -> 11:50', value: '2018-01-19T11:30:00.000Z' },
-                    { text: '11:35 -> 11:55', value: '2018-01-19T11:35:00.000Z' },
-                    { text: '11:40 -> 12:00', value: '2018-01-19T11:40:00.000Z' },
-                    { text: '11:45 -> 12:05', value: '2018-01-19T11:45:00.000Z' },
-                    { text: '11:50 -> 12:10', value: '2018-01-19T11:50:00.000Z' },
-                    { text: '11:55 -> 12:15', value: '2018-01-19T11:55:00.000Z' },
-                    { text: '12:00 -> 12:20', value: '2018-01-19T12:00:00.000Z' },
-                    { text: '12:05 -> 12:25', value: '2018-01-19T12:05:00.000Z' },
-                    { text: '12:10 -> 12:30', value: '2018-01-19T12:10:00.000Z' },
-                    { text: '12:15 -> 12:35', value: '2018-01-19T12:15:00.000Z' },
-                    { text: '12:20 -> 12:40', value: '2018-01-19T12:20:00.000Z' },
-                    { text: '12:25 -> 12:45', value: '2018-01-19T12:25:00.000Z' },
-                  ],
+                  options: [],
                 },
               ],
             },
           ];
-          const slackCall = nockSlackCall('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
+          const slackCall = nockSlackCallWithoutOptions('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
 
           massageBooking.bookMassage(payload, () => {
             slackCall.done();
