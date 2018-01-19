@@ -141,7 +141,7 @@ class MassageBooking {
       });
     } else {
       this.bookingRepository.all().catch(callback).then((bookings) => {
-        const nextAvailabilities = findAvailabilitiesForUserId(bookings, payload.user_id, this.bookingDuration, 25);
+        const nextAvailabilities = findAvailabilitiesForUserId(bookings, payload.user_id, this.bookingDuration);
         const now = new Date();
         const previousBooking = bookings.filter(booking => booking.dateRange.end > now).find(booking => booking.user.id === payload.user_id);
 
