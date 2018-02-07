@@ -382,7 +382,7 @@ describe('MassageBooking', () => {
                 },
                 {
                   name: 'book',
-                  text: 'Pick a another time...',
+                  text: 'Pick another time...',
                   type: 'select',
                   options: [
                     { text: '11:40 -> 12:00', value: '2018-01-19T11:40:00.000Z' },
@@ -469,7 +469,7 @@ describe('MassageBooking', () => {
                 },
                 {
                   name: 'book',
-                  text: 'Pick a another time...',
+                  text: 'Pick another time...',
                   type: 'select',
                   options: [
                     { text: '10:50 -> 11:10', value: '2018-01-19T10:50:00.000Z' },
@@ -551,7 +551,7 @@ describe('MassageBooking', () => {
                 },
                 {
                   name: 'book',
-                  text: 'Pick a another time...',
+                  text: 'Pick another time...',
                   type: 'select',
                   options: [
                     { text: '10:25 -> 10:45', value: '2018-01-19T10:25:00.000Z' },

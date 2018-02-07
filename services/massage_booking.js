@@ -160,7 +160,7 @@ class MassageBooking {
               },
               {
                 name: 'book',
-                text: 'Pick a another time...',
+                text: 'Pick another time...',
                 type: 'select',
                 options: nextAvailabilities.map(date => ({
                   text: `${timeToString(date)} -> ${timeToString(addMinutes(date, this.bookingDuration))}`,
