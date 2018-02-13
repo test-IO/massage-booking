@@ -58,6 +58,14 @@ app.post('/slack/actions', urlencodedParser, (req, res) => {
   });
 });
 
+app.get('/bookings', (req, res) => {
+  res.status(200);
+  massageBooking.bookingRepository.all().then((bookings) => {
+    const now = new Date();
+    res.json({ bookings: bookings.filter(booking => booking.dateRange.end > now).sort((a, b) => a.dateRange.start - b.dateRange.start) });
+  });
+});
+
 app.listen(3000, () => {
   logger.info('Web server is listening', { port: 3000 });
 });
