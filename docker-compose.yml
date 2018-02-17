@@ -7,6 +7,7 @@ services:
     environment:
       - BOOKING_DURATION=20
       - LOG_LEVEL=debug
+      - NODE_ENV=development
       - REDIS_HOST=redis
     ports:
       - '3000:3000'
