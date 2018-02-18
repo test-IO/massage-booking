@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node ./server.js",
-    "test": "mocha --recursive",
+    "test": "NODE_ENV=test mocha --recursive --exit",
     "lint": "eslint ."
   },
   "author": "Simon Lacroix <simon@test.io>",
@@ -19,11 +19,13 @@
     "winston": "^2.4.0"
   },
   "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-http": "^3.0.0",
     "eslint": "^4.13.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.8.0",
     "faker": "^4.1.0",
-    "mocha": "^4.0.1",
+    "mocha": "^4.1.0",
     "nock": "^9.1.5",
     "timekeeper": "^2.0.0"
   }
