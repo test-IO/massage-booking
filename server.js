@@ -5,7 +5,7 @@ const { WebClient } = require('@slack/client');
 
 const massageBooking = new MassageBooking(
   new WebClient(process.env.SLACK_API_TOKEN),
-  { host: process.env.REDIS_HOST },
+  { host: process.env.REDIS_HOST, prefix: process.env.NODE_ENV },
   parseInt(process.env.BOOKING_DURATION, 10),
 );
 
