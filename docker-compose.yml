@@ -9,6 +9,7 @@ services:
       - LOG_LEVEL=debug
       - NODE_ENV=development
       - REDIS_HOST=redis
+      - TZ=Europe/London
     ports:
       - '3000:3000'
     volumes:
