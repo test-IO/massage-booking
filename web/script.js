@@ -23,9 +23,8 @@ var state = {
 
 var update = function() {
   $.get('/bookings', function(data, status){
-    var parsed = $.parseJSON(data);
-    window.state.current_bookings = parsed.bookings.shift();
-    window.state.upcoming_bookings = parsed.bookings;
+    window.state.current_bookings = data.bookings.shift();
+    window.state.upcoming_bookings = data.bookings;
   });
 }
 
