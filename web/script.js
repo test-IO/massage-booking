@@ -16,15 +16,30 @@ rivets.formatters.eq = function(val, arg){
   return val == arg
 }
 
+rivets.formatters.date = function(value){
+  return moment(value).fromNow();
+}
+
 var state = {
-  current_booking: { realName: 'loading...' },
+  running: false,
+  empty: true,
+  current_booking: { user: { realName: 'loading...' } },
   upcoming_bookings: []
 }
 
 var update = function() {
+  return "";
   $.get('/bookings', function(data, status){
-    window.state.current_bookings = data.bookings.shift();
+    window.state.empty = data.bookings.length == 0;
+    window.state.current_booking = data.bookings.shift();
     window.state.upcoming_bookings = data.bookings;
+    if (typeof window.state.current_booking != "undefined") {
+      var start = moment(window.state.current_booking.dateRange.start);
+      var end = moment(window.state.current_booking.dateRange.end);
+      window.state.running = (start < moment() && end > moment());
+    } else {
+      window.state.running = false;
+    }
   });
 }
 
