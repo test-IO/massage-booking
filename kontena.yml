@@ -1,0 +1,82 @@
+stack: massage-booking
+version: 1.0.0
+description: Book your massage !
+variables:
+  entry_node:
+    type: string
+    from:
+      prompt: Node name of load balancer (kontena node ls)
+  target:
+    type: enum
+    options:
+      - production
+    from:
+      prompt: Select environment
+  app_domain:
+    type: string
+    default: massage-booking.test.io
+    from:
+      prompt: App domain
+  slack_api_token:
+      type: string
+      from:
+        vault: MASSAGE_SLACK_API_TOKEN
+        prompt: SLACK_API_TOKEN
+      to:
+        vault: MASSAGE_SLACK_API_TOKEN
+  verification_token:
+      type: string
+      from:
+        vault: MASSAGE_VERIFICATION_TOKEN
+        prompt: VERIFICATION_TOKEN
+      to:
+        vault: MASSAGE_VERIFICATION_TOKEN
+services:
+  loadbalancer:
+    image: kontena/lb:latest
+    environment:
+      - KONTENA_LB_HEALTH_URI=/__health
+    ports:
+      - 80:80
+    affinity:
+      - "node=={{ entry_node }}"
+    health_check:
+      protocol: http
+      port: 80
+      interval: 10
+      uri: /__health
+      initial_delay: 10
+      timeout: 2
+  app:
+    image: testl0/massage-booking
+    instances: 1
+    links:
+      - loadbalancer
+      - redis
+    environment:
+      - KONTENA_LB_INTERNAL_PORT=3000
+      - KONTENA_LB_VIRTUAL_HOSTS={{ app_domain }}
+      - BOOKING_DURATION=20
+      - LOG_LEVEL=error
+      - NODE_ENV=production
+      - REDIS_HOST=redis
+      - TZ=Europe/Berlin
+    secrets:
+      - secret: MASSAGE_SLACK_API_TOKEN
+        name: SLACK_API_TOKEN
+        type: env
+      - secret: MASSAGE_VERIFICATION_TOKEN
+        name: VERIFICATION_TOKEN
+        type: env
+    deploy:
+      strategy: ha
+      wait_for_port: 3000
+  redis:
+    image: redis
+    stateful: true
+    health_check:
+      protocol: tcp
+      port: 6379
+      interval: 10
+      initial_delay: 10
+      timeout: 2
