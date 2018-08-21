@@ -12,17 +12,9 @@ rivets.configure({
   executeFunctions: false,
 });
 
-rivets.formatters.eq = function (val, arg) {
-  return val === arg;
-};
-
-rivets.formatters.date = function (value) {
-  return moment(value).fromNow();
-};
-
-rivets.formatters.time = function (value) {
-  return moment(value).format('HH:mm');
-};
+rivets.formatters.eq = (val, arg) => val === arg;
+rivets.formatters.date = value => moment(value).fromNow();
+rivets.formatters.time = value => moment(value).format('HH:mm');
 
 const state = {
   running: false,
@@ -31,7 +23,7 @@ const state = {
   upcoming_bookings: [],
 };
 
-const update = function () {
+const update = () => {
   $.get('/bookings', (data) => {
     state.empty = data.bookings.length === 0;
     state.current_booking = data.bookings.shift();

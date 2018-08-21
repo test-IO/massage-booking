@@ -6,8 +6,5 @@
     "$": true,
     "moment": true,
     "rivets": true
-  },
-  "rules": {
-    "func-names": "off"
   }
 }
