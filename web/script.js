@@ -33,22 +33,21 @@ const state = {
 
 const update = function () {
   $.get('/bookings', (data) => {
-    window.state.empty = data.bookings.length === 0;
-    window.state.current_booking = data.bookings.shift();
-    window.state.upcoming_bookings = data.bookings;
-    if (typeof window.state.current_booking !== 'undefined') {
-      const start = moment(window.state.current_booking.dateRange.start);
-      const end = moment(window.state.current_booking.dateRange.end);
-      window.state.running = (start < moment() && end > moment());
+    state.empty = data.bookings.length === 0;
+    state.current_booking = data.bookings.shift();
+    state.upcoming_bookings = data.bookings;
+    if (typeof state.current_booking !== 'undefined') {
+      const start = moment(state.current_booking.dateRange.start);
+      const end = moment(state.current_booking.dateRange.end);
+      state.running = (start < moment() && end > moment());
     } else {
-      window.state.running = false;
+      state.running = false;
     }
   });
 };
 
 $(() => {
   rivets.bind($('body'), state);
-  window.state = state;
-  update();
-  setInterval(update, 10000);
+  update(state);
+  setInterval(update, state, 10000);
 });
