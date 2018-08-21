@@ -13,7 +13,7 @@ rivets.configure({
 });
 
 rivets.formatters.eq = function (val, arg) {
-  return val == arg;
+  return val === arg;
 };
 
 rivets.formatters.date = function (value) {
@@ -32,7 +32,7 @@ const state = {
 };
 
 const update = function () {
-  $.get('/bookings', (data, status) => {
+  $.get('/bookings', (data) => {
     window.state.empty = data.bookings.length === 0;
     window.state.current_booking = data.bookings.shift();
     window.state.upcoming_bookings = data.bookings;
