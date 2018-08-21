@@ -120,7 +120,7 @@ class MassageBooking {
   }
 
   bookMassage(payload, callback) {
-    if (['list', 'ls', 'miaouuu'].includes(payload.text)) {
+    if (payload.text === 'list') {
       const now = new Date();
       this.bookingRepository.all().catch(callback).then((bookings) => {
         const attachments = bookings.filter(booking => booking.dateRange.end > now).sort((a, b) => a.dateRange.start - b.dateRange.start).map((booking) => {
