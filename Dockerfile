@@ -5,6 +5,7 @@ RUN apk --update add \
   bash \
   curl \
   nodejs \
+  npm \
   tmux \
   tzdata \
   vim \
