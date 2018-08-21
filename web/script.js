@@ -48,6 +48,6 @@ const update = function () {
 
 $(() => {
   rivets.bind($('body'), state);
-  update(state);
-  setInterval(update, state, 10000);
+  update();
+  setInterval(update, 10000);
 });
