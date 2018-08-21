@@ -48,10 +48,57 @@ table {
 }
 
 
+.right {
+  text-align:right;
+}
+.left {
+  text-align:left;
+}
+.white {
+  color:white;
+}
+
+
 @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
 
 body {
   font-family:'Source Sans Pro', sans-serif;
+  background-color:#333;
+  color:#CCC;
+}
+
+pre {
+  display: block;
+  font-family: monospace;
+  white-space: pre;
+  margin: 1em 0;
+}
+
+#container {
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  height:100vh;
+}
+
+.empty {
+  background-color:#444;
+  border:5px solid #AAA;
+  padding:5em 7em;
+}
+
+.empty h1 {
+  font-size:3em;
+  text-transform:uppercase;
+}
+
+.empty p {
+  margin:3em 0;
+}
+
+.empty pre {
+  text-align:center;
+  font-size:3em;
 }
 
 #current_booking {
