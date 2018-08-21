@@ -32,7 +32,6 @@ var state = {
 }
 
 var update = function() {
-  return "";
   $.get('/bookings', function(data, status){
     window.state.empty = data.bookings.length == 0;
     window.state.current_booking = data.bookings.shift();

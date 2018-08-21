@@ -21,11 +21,11 @@
           <div rv-each-booking="upcoming_bookings">
             <dl>
               <dt>
-                { current_booking.dateRange.start | time }
+                { booking.dateRange.start | time }
                 to
-                { current_booking.dateRange.end | time }
+                { booking.dateRange.end | time }
               </dt>
-              <dd>{ booking.realName }</dd>
+              <dd>{ booking.user.realName }</dd>
             </dl>
           </div>
         </div>
