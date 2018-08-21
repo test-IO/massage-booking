@@ -15,9 +15,14 @@
       </div>
       <div rv-hide="empty">
         <div id="current_booking" rv-class-running="running">
-          <div class="realName">{ current_booking.user.realName }</div>
-          <div>{ current_booking.dateRange.start | date }</div>
-          <div>{ current_booking.dateRange.end | date }</div>
+          <div class="who">
+            <img rv-show="running" src="web/massage.gif" width="250" height="191" class="massage_gif" />
+            <div>
+              <div class="realName">{ current_booking.user.realName }</div>
+              <div rv-hide="running">starts { current_booking.dateRange.start | date }</div>
+              <div rv-show="running">ends { current_booking.dateRange.end | date }</div>
+            </div>
+          </div>
         </div>
         <div id="upcoming_bookings">
           <div rv-each-booking="upcoming_bookings">

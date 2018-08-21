@@ -102,9 +102,21 @@ pre {
 }
 
 #current_booking {
-  margin:auto;
-  width:100%;
-  height:;
+  margin:2em auto;
+}
+#current_booking .who {
+  display:flex;
+  justify-content: center;
+}
+#current_booking .who img {
+  margin:0 1em 0 0;
+}
+#current_booking .realName {
+  font-size:3em;
+}
+
+#upcoming_bookings {
+  
 }
 
 .running {

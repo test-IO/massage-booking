@@ -20,6 +20,7 @@ app.get('/', (req, res) => res.send('Hello World!'));
 app.get('/web', (req, res) => res.sendfile(`${__dirname}/web/index.html`));
 app.get('/web/script.js', (req, res) => res.sendfile(`${__dirname}/web/script.js`));
 app.get('/web/style.css', (req, res) => res.sendfile(`${__dirname}/web/style.css`));
+app.get('/web/massage.gif', (req, res) => res.sendfile(`${__dirname}/web/massage.gif`));
 
 app.post('/slack/slash-commands/massage_booking', urlencodedParser, (req, res) => {
   res.status(200).end();
