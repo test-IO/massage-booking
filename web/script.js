@@ -50,4 +50,7 @@ $(() => {
   rivets.bind($('body'), state);
   update();
   setInterval(update, 10000);
+  setTimeout(() => {
+    $('#container').show();
+  }, 100);
 });
