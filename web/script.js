@@ -20,6 +20,10 @@ rivets.formatters.date = function(value){
   return moment(value).fromNow();
 }
 
+rivets.formatters.time = function(value){
+  return moment(value).format('HH:mm');
+}
+
 var state = {
   running: false,
   empty: true,

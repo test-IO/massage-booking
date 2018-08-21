@@ -19,7 +19,14 @@
         </div>
         <div id="upcoming_bookings">
           <div rv-each-booking="upcoming_bookings">
-            <div>{ booking.realName }</div>
+            <dl>
+              <dt>
+                { current_booking.dateRange.start | time }
+                to
+                { current_booking.dateRange.end | time }
+              </dt>
+              <dd>{ booking.realName }</dd>
+            </dl>
           </div>
         </div>
       </div>
