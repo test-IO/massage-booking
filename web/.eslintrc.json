@@ -1,0 +1,10 @@
+{
+  "env": {
+    "browser": true
+  },
+  "globals": {
+    "$": true,
+    "moment": true,
+    "rivets": true
+  }
+}

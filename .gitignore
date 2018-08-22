@@ -1,3 +1,6 @@
+.DS_Store
+.ruby-gemset
 node_modules
 variables.env
 variables.stack.env
+.swp
