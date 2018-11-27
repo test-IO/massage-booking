@@ -1,0 +1,31 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: massage-booking
+  labels:
+    app: massage-booking
+    env: stage-c
+    deployment: 0.0.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: massage-booking
+      env: stage-c
+  template:
+    metadata:
+      labels:
+        app: massage-booking
+        env: stage-c
+    spec:
+      containers:
+        - name: massage-booking
+          image: "gcr.io/oi-tset/massage-booking:0.0.0"
+          ports:
+            - containerPort: 3000
+          imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            timeoutSeconds: 3
