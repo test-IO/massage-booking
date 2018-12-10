@@ -697,6 +697,61 @@ describe('MassageBooking', () => {
         });
       });
     });
+
+    describe('cancel', () => {
+      it('return list of bookings', (done) => {
+        const realNames = Array.from(Array(6), () => faker.name.findName());
+        const bookings = [];
+
+        let user = new User('U25PP0KEE', 'simon', 'Simon Lacroix');
+        let dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 30, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 50, 0, 0),
+        );
+        bookings.push(new Booking(user, dateRange));
+
+        user = new User(faker.random.uuid(), faker.internet.userName(), realNames[0]);
+        dateRange = new DateRange(
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0),
+          new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 20, 0, 0),
+        );
+        bookings.push(new Booking(user, dateRange));
+
+        Promise.all(bookings.map(booking => bookingRepository.add(booking))).catch(done).then(() => {
+          const payload = {
+            token: '',
+            team_id: 'T25MRFT3M',
+            channel_id: 'C8HTS5MEC',
+            user_id: 'U25PP0KEE',
+            command: '/book-massage',
+            text: 'cancel',
+            response_url: 'https://hooks.slack.com/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb',
+            trigger_id: '290064239264.73739537123.0cb6e21b315eff944b90b083405e102c',
+          };
+
+          timekeeper.travel(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 27));
+          const attachments = [
+            { text: 'Your booking has been successfully canceled', color: '#36a64f' },
+          ];
+          const slackCall = nockSlackCall('/commands/T25MRFT3M/290865925813/ZJM12v4tsId9wbDyjDoYa5Hb', { attachments });
+
+          massageBooking.bookMassage(payload, () => {
+            slackCall.done();
+
+            bookingRepository.all().catch(done).then((newBookings) => {
+              assert.notEqual(newBookings.length, 1);
+
+              const booking = newBookings[0];
+              assert.notEqual(booking.user.id, 'U25PP0KEE');
+              assert.notEqual(booking.user.name, 'simon');
+              assert.notEqual(booking.user.realName, 'Simon Lacroix');
+
+              done();
+            });
+          });
+        });
+      });
+    });
   });
 
   describe('#notifyUserOfBooking()', () => {

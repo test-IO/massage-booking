@@ -139,6 +139,24 @@ class MassageBooking {
 
         sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
       });
+    } else if (payload.text === 'cancel') {
+      this.bookingRepository.all().catch(callback).then((bookings) => {
+        bookings.forEach((booking) => {
+          if (booking.user.id === payload.user_id) {
+            this.bookingRepository.remove(booking).catch(callback);
+          }
+        });
+      });
+
+      const attachments = [
+        {
+          text: 'Your booking has been successfully canceled',
+          color: '#36a64f',
+
+        },
+      ];
+
+      sendMessageToSlackResponseUrl(payload.response_url, { attachments }, callback);
     } else {
       this.bookingRepository.all().catch(callback).then((bookings) => {
         const nextAvailabilities = findAvailabilitiesForUserId(bookings, payload.user_id, this.bookingDuration, 25);
